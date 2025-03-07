@@ -52,14 +52,16 @@ function AuthPage() {
       <header className="px-4 lg:px-6 h-16 flex items-center border-b bg-white shadow-sm">
         <Link to={"/"} className="flex items-center justify-center">
           <GraduationCap className="h-8 w-8 mr-4 text-primary" />
-          <span className="font-extrabold text-xl text-primary">LMS LEARN</span>
+          <span className="font-extrabold text-xl text-primary">
+            MVGR LEARN
+          </span>
         </Link>
       </header>
       <div className="flex items-center justify-center flex-1 p-4">
         <div className="w-full max-w-md">
           <div className="mb-6 text-center">
             <h1 className="text-2xl font-bold text-gray-800">
-              Welcome to LMS LEARN
+              Welcome to MVGR LEARN
             </h1>
             <p className="text-gray-600">
               Your journey to knowledge starts here
