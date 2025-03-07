@@ -80,7 +80,7 @@ function StudentViewCourseDetailsPage() {
       userName: auth?.user?.userName,
       userEmail: auth?.user?.userEmail,
       orderStatus: "pending",
-      paymentMethod: "paypal",
+      // paymentMethod: "paypal",
       paymentStatus: "initiated",
       orderDate: new Date(),
       paymentId: "",
@@ -133,8 +133,8 @@ function StudentViewCourseDetailsPage() {
   const getIndexOfFreePreviewUrl =
     studentViewCourseDetails !== null
       ? studentViewCourseDetails?.curriculum?.findIndex(
-          (item) => item.freePreview
-        )
+        (item) => item.freePreview
+      )
       : -1;
 
   return (
@@ -192,11 +192,10 @@ function StudentViewCourseDetailsPage() {
               {studentViewCourseDetails?.curriculum?.map(
                 (curriculumItem, index) => (
                   <li
-                    className={`${
-                      curriculumItem?.freePreview
+                    className={`${curriculumItem?.freePreview
                         ? "cursor-pointer"
                         : "cursor-not-allowed"
-                    } flex items-center mb-4`}
+                      } flex items-center mb-4`}
                     onClick={
                       curriculumItem?.freePreview
                         ? () => handleSetFreePreview(curriculumItem)
@@ -223,8 +222,8 @@ function StudentViewCourseDetailsPage() {
                   url={
                     getIndexOfFreePreviewUrl !== -1
                       ? studentViewCourseDetails?.curriculum[
-                          getIndexOfFreePreviewUrl
-                        ].videoUrl
+                        getIndexOfFreePreviewUrl
+                      ].videoUrl
                       : ""
                   }
                   width="450px"
