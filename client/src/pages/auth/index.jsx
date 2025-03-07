@@ -134,7 +134,7 @@ function AuthPage() {
         </div>
       </div>
       <footer className="py-4 text-center text-sm text-gray-600 bg-white border-t">
-        <p>© {new Date().getFullYear()} LMS LEARN. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} MVGR LEARN. All rights reserved.</p>
       </footer>
     </div>
   );
