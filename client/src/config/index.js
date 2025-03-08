@@ -184,3 +184,6 @@ export const filterOptions = {
   level: courseLevelOptions,
   primaryLanguage: languageOptions,
 };
+
+
+export const privilagedUserRoles = ["instructor"];

@@ -13,11 +13,15 @@ import StudentViewCourseDetailsPage from "./pages/student/course-details";
 // import PaypalPaymentReturnPage from "./pages/student/payment-return";
 import StudentCoursesPage from "./pages/student/student-courses";
 import StudentViewCourseProgressPage from "./pages/student/course-progress";
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from "react-toastify";
 
 function App() {
   const { auth } = useContext(AuthContext);
 
   return (
+    <>  
+    <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} theme="light" />
     <Routes>
       <Route
         path="/auth"
@@ -85,6 +89,7 @@ function App() {
       </Route>
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
+    </>
   );
 }
 

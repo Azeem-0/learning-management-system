@@ -3,10 +3,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 import { useContext } from "react";
 import { AuthContext } from "@/context/auth-context";
+import { privilagedUserRoles } from "@/config";
 
 function StudentViewCommonHeader() {
   const navigate = useNavigate();
-  const { resetCredentials } = useContext(AuthContext);
+  const { resetCredentials,auth } = useContext(AuthContext);
+
 
   function handleLogout() {
     resetCredentials();
@@ -35,6 +37,21 @@ function StudentViewCommonHeader() {
             Explore Courses
           </Button>
         </div>
+
+        {privilagedUserRoles.includes(auth?.user?.role)  ?  <div className="flex items-center space-x-1">
+          <Button
+            variant="ghost"
+            onClick={() => {
+              location.pathname.includes("/instructor")
+                ? null
+                : navigate("/instructor");
+            }}
+            className="text-[14px] md:text-[16px] font-medium"
+          >
+            Instructor
+          </Button>
+        </div> : null}
+
       </div>
       <div className="flex items-center space-x-4">
         <div className="flex gap-4 items-center">

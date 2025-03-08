@@ -1,11 +1,15 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { initialSignInFormData, initialSignUpFormData } from "@/config";
 import { checkAuthService, loginService, registerService } from "@/services";
-import { createContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
+import { nContext } from "../notification-context";
 
 export const AuthContext = createContext(null);
 
 export default function AuthProvider({ children }) {
+
+  const {notify} = useContext(nContext);
+  
   const [signInFormData, setSignInFormData] = useState(initialSignInFormData);
   const [signUpFormData, setSignUpFormData] = useState(initialSignUpFormData);
   const [auth, setAuth] = useState({
@@ -33,11 +37,13 @@ export default function AuthProvider({ children }) {
         authenticate: true,
         user: data.data.user,
       });
+      notify("Login successful");
     } else {
       setAuth({
         authenticate: false,
         user: null,
       });
+      notify("Login failed");
     }
   }
 
@@ -76,6 +82,7 @@ export default function AuthProvider({ children }) {
       authenticate: false,
       user: null,
     });
+    notify("Logout successful");
   }
 
   useEffect(() => {

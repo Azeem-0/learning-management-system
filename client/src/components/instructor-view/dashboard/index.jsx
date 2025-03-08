@@ -90,7 +90,7 @@ function InstructorDashboard({ listOfCourses }) {
               <TableBody>
                 {calculateTotalStudentsAndProfit().studentList.map(
                   (studentItem, index) => (
-                    <TableRow key={index}>
+                    <TableRow key={index }>
                       <TableCell className="font-medium">
                         {studentItem.courseTitle}
                       </TableCell>

@@ -1,10 +1,11 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { Fragment } from "react";
+import { privilagedUserRoles } from "@/config";
 
 function RouteGuard({ authenticated, user, element }) {
   const location = useLocation();
 
-  console.log(authenticated, user, "useruser");
+  console.log(authenticated, user, "user");
 
   if (!authenticated && !location.pathname.includes("/auth")) {
     return <Navigate to="/auth" />;
@@ -12,7 +13,7 @@ function RouteGuard({ authenticated, user, element }) {
 
   if (
     authenticated &&
-    user?.role !== "instructor" &&
+    !privilagedUserRoles.includes(user?.role) &&
     (location.pathname.includes("instructor") ||
       location.pathname.includes("/auth"))
   ) {
@@ -21,8 +22,7 @@ function RouteGuard({ authenticated, user, element }) {
 
   if (
     authenticated &&
-    user.role === "instructor" &&
-    !location.pathname.includes("instructor")
+    privilagedUserRoles.includes(user?.role) && location.pathname.includes("/auth")
   ) {
     return <Navigate to="/instructor" />;
   }

@@ -5,8 +5,11 @@ import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { AuthContext } from "@/context/auth-context";
 import { InstructorContext } from "@/context/instructor-context";
 import { fetchInstructorCourseListService } from "@/services";
-import { BarChart, Book, LogOut } from "lucide-react";
+import { HomeIcon } from "@radix-ui/react-icons";
+import { BarChart, Book, Home, LogOut,LogInIcon, LogIn } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
+import StudentHomePage from "../student/home";
+import AdminBulkRegisterPage from "@/components/admin-components";
 
 function InstructorDashboardpage() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -25,6 +28,12 @@ function InstructorDashboardpage() {
 
   const menuItems = [
     {
+      icon: HomeIcon,
+      label: "Home",
+      value: "home",
+      component: null
+    },
+    {
       icon: BarChart,
       label: "Dashboard",
       value: "dashboard",
@@ -35,6 +44,12 @@ function InstructorDashboardpage() {
       label: "Courses",
       value: "courses",
       component: <InstructorCourses listOfCourses={instructorCoursesList} />,
+    },
+    {
+      icon : LogIn,
+      label: "Bulk Register", 
+      value: "bulk register",
+      component: <AdminBulkRegisterPage />
     },
     {
       icon: LogOut,
@@ -65,13 +80,17 @@ function InstructorDashboardpage() {
                 onClick={
                   menuItem.value === "logout"
                     ? handleLogout
+                    : menuItem.value === "home"
+                    ? () => {
+                        window.location.href = "/";
+                      }
                     : () => setActiveTab(menuItem.value)
                 }
               >
                 <menuItem.icon className="mr-2 h-4 w-4" />
                 {menuItem.label}
               </Button>
-            ))}
+            ))} 
           </nav>
         </div>
       </aside>
