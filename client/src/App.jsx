@@ -23,6 +23,7 @@ function App() {
     <>  
     <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} theme="light" />
     <Routes>
+      {/* working */}
       <Route
         path="/auth"
         element={
@@ -33,6 +34,8 @@ function App() {
           />
         }
       />
+
+      {/* working */}
       <Route
         path="/instructor"
         element={
@@ -43,6 +46,8 @@ function App() {
           />
         }
       />
+
+      {/* working */}
       <Route
         path="/instructor/create-new-course"
         element={
@@ -53,6 +58,9 @@ function App() {
           />
         }
       />
+
+
+      {/* have to check */}
       <Route
         path="/instructor/edit-course/:courseId"
         element={
@@ -63,6 +71,8 @@ function App() {
           />
         }
       />
+
+      {/* working */}
       <Route
         path="/"
         element={
