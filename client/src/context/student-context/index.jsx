@@ -8,7 +8,7 @@ export default function StudentProvider({ children }) {
   const [studentViewCourseDetails, setStudentViewCourseDetails] =
     useState(null);
   const [currentCourseDetailsId, setCurrentCourseDetailsId] = useState(null);
-  const [studentBoughtCoursesList, setStudentBoughtCoursesList] = useState([]);
+  const [studentAssignedCoursesList,setStudentAssignedCoursesList] = useState([]);
   const [studentCurrentCourseProgress, setStudentCurrentCourseProgress] =
     useState({});
 
@@ -23,8 +23,8 @@ export default function StudentProvider({ children }) {
         setStudentViewCourseDetails,
         currentCourseDetailsId,
         setCurrentCourseDetailsId,
-        studentBoughtCoursesList,
-        setStudentBoughtCoursesList,
+        studentAssignedCoursesList,
+        setStudentAssignedCoursesList,
         studentCurrentCourseProgress,
         setStudentCurrentCourseProgress,
       }}

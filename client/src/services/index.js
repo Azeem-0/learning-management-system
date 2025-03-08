@@ -129,3 +129,9 @@ export async function resetCourseProgressService(userId, courseId) {
 
   return data;
 }
+
+export async function fetchStudentAssignedCoursesService(userId) {
+  const { data } = await axiosInstance.get(`/student/assigned-courses/${userId}`);
+  return data;
+}
+

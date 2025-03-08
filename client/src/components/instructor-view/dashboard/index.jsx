@@ -7,15 +7,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { DollarSign, Users } from "lucide-react";
+import { Users } from "lucide-react";
 
 function InstructorDashboard({ listOfCourses }) {
   function calculateTotalStudents() {
-    const { totalStudents, totalProfit, studentList } = listOfCourses.reduce(
+    const { totalStudents, studentList } = listOfCourses.reduce(
       (acc, course) => {
         const studentCount = course.students.length;
         acc.totalStudents += studentCount;
-        acc.totalProfit += course.pricing * studentCount;
 
         course.students.forEach((student) => {
           acc.studentList.push({
@@ -29,13 +28,11 @@ function InstructorDashboard({ listOfCourses }) {
       },
       {
         totalStudents: 0,
-        totalProfit: 0,
         studentList: [],
       }
     );
 
     return {
-      totalProfit,
       totalStudents,
       studentList,
     };
@@ -49,7 +46,7 @@ function InstructorDashboard({ listOfCourses }) {
       label: "Total Students",
       value: calculateTotalStudents().totalStudents,
     },
-  ];
+    ];
 
   return (
     <div>

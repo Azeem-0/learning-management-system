@@ -22,8 +22,8 @@ function CommonForm({
       }}
     >
       <div className="space-y-4">
-        {formControls.map((controlItem) => (
-          <div className="space-y-2" key={controlItem.id}>
+        {formControls.map((controlItem, index) => (
+          <div className="space-y-2" key={index}>
             <Label htmlFor={controlItem.id}>{controlItem.label}</Label>
             <Input
               id={controlItem.id}

@@ -6,11 +6,11 @@ const getAllStudentViewCourses = async (req, res) => {
       category = [],
       level = [],
       primaryLanguage = [],
-      sortBy = "price-lowtohigh",
+      sortBy = "title-atoz",
     } = req.query;
 
     console.log(req.query, "req.query");
-
+      
     let filters = {};
     if (category.length) {
       filters.category = { $in: category.split(",") };
@@ -24,14 +24,6 @@ const getAllStudentViewCourses = async (req, res) => {
 
     let sortParam = {};
     switch (sortBy) {
-      case "price-lowtohigh":
-        sortParam.pricing = 1;
-
-        break;
-      case "price-hightolow":
-        sortParam.pricing = -1;
-
-        break;
       case "title-atoz":
         sortParam.title = 1;
 
@@ -42,7 +34,7 @@ const getAllStudentViewCourses = async (req, res) => {
         break;
 
       default:
-        sortParam.pricing = 1;
+        sortParam.title = 1;
         break;
     }
 
