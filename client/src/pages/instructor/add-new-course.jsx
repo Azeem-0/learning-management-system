@@ -49,8 +49,6 @@ function AddNewCoursePage() {
       }
     }
 
-    let hasFreePreview = false;
-
     for (const item of courseCurriculumFormData) {
       if (
         isEmpty(item.title) ||
@@ -59,13 +57,9 @@ function AddNewCoursePage() {
       ) {
         return false;
       }
-
-      if (item.freePreview) {
-        hasFreePreview = true; //found at least one free preview
-      }
     }
 
-    return hasFreePreview;
+    return true;
   }
 
   async function handleCreateCourse() {

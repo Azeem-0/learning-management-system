@@ -14,7 +14,7 @@ function StudentHomePage() {
   const { studentViewCoursesList, setStudentViewCoursesList } =
     useContext(StudentContext);
   const { auth } = useContext(AuthContext);
-  
+
   const navigate = useNavigate();
 
   function handleNavigateToCoursesPage(getCurrentId) {
@@ -105,9 +105,6 @@ function StudentHomePage() {
                   <h3 className="font-bold mb-2">{courseItem?.title}</h3>
                   <p className="text-sm text-gray-700 mb-2">
                     {courseItem?.instructorName}
-                  </p>
-                  <p className="font-bold text-[16px]">
-                    ${courseItem?.pricing}
                   </p>
                 </div>
               </div>

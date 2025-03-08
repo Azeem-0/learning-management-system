@@ -10,7 +10,7 @@ import {
 import { DollarSign, Users } from "lucide-react";
 
 function InstructorDashboard({ listOfCourses }) {
-  function calculateTotalStudentsAndProfit() {
+  function calculateTotalStudents() {
     const { totalStudents, totalProfit, studentList } = listOfCourses.reduce(
       (acc, course) => {
         const studentCount = course.students.length;
@@ -41,18 +41,13 @@ function InstructorDashboard({ listOfCourses }) {
     };
   }
 
-  console.log(calculateTotalStudentsAndProfit());
+  console.log(calculateTotalStudents());
 
   const config = [
     {
       icon: Users,
       label: "Total Students",
-      value: calculateTotalStudentsAndProfit().totalStudents,
-    },
-    {
-      icon: DollarSign,
-      label: "Total Revenue",
-      value: calculateTotalStudentsAndProfit().totalProfit,
+      value: calculateTotalStudents().totalStudents,
     },
   ];
 
@@ -67,9 +62,6 @@ function InstructorDashboard({ listOfCourses }) {
               </CardTitle>
               <item.icon className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{item.value}</div>
-            </CardContent>
           </Card>
         ))}
       </div>
@@ -88,7 +80,7 @@ function InstructorDashboard({ listOfCourses }) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {calculateTotalStudentsAndProfit().studentList.map(
+                {calculateTotalStudents().studentList.map(
                   (studentItem, index) => (
                     <TableRow key={index }>
                       <TableCell className="font-medium">

@@ -36,7 +36,7 @@ function createSearchParamsHelper(filterParams) {
 }
 
 function StudentViewCoursesPage() {
-  const [sort, setSort] = useState("price-lowtohigh");
+  
   const [filters, setFilters] = useState({});
   const [searchParams, setSearchParams] = useSearchParams();
   const {
@@ -108,7 +108,6 @@ function StudentViewCoursesPage() {
   }, [filters]);
 
   useEffect(() => {
-    setSort("price-lowtohigh");
     setFilters(JSON.parse(sessionStorage.getItem("filters")) || {});
   }, []);
 
@@ -220,9 +219,6 @@ function StudentViewCoursesPage() {
                             ? "Lecture"
                             : "Lectures"
                         } - ${courseItem?.level.toUpperCase()} Level`}
-                      </p>
-                      <p className="font-bold text-lg">
-                        ${courseItem?.pricing}
                       </p>
                     </div>
                   </CardContent>

@@ -129,13 +129,6 @@ export const courseLandingPageFormControls = [
     placeholder: "Enter course description",
   },
   {
-    name: "pricing",
-    label: "Pricing",
-    componentType: "input",
-    type: "number",
-    placeholder: "Enter course pricing",
-  },
-  {
     name: "objectives",
     label: "Objectives",
     componentType: "textarea",
@@ -157,7 +150,6 @@ export const courseLandingInitialFormData = {
   primaryLanguage: "",
   subtitle: "",
   description: "",
-  pricing: "",
   objectives: "",
   welcomeMessage: "",
   image: "",
@@ -167,14 +159,11 @@ export const courseCurriculumInitialFormData = [
   {
     title: "",
     videoUrl: "",
-    freePreview: false,
     public_id: "",
   },
 ];
 
 export const sortOptions = [
-  { id: "price-lowtohigh", label: "Price: Low to High" },
-  { id: "price-hightolow", label: "Price: High to Low" },
   { id: "title-atoz", label: "Title: A to Z" },
   { id: "title-ztoa", label: "Title: Z to A" },
 ];
