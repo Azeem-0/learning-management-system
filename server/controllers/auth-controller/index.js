@@ -34,11 +34,11 @@ const registerUserUtility = async ({userName,userEmail,password,role,regd,branch
 
   const hashPassword = await bcrypt.hash(password, 10);
   const newUser = new User({
-    userName,
-    userEmail,
-    role,
-    regd,
-    branch,
+    userName: userName.trim(),
+    userEmail: userEmail.trim(),
+    role: role.trim(),
+    regd: regd.trim(),
+    branch: branch.trim(),
     password: hashPassword,
   });
 

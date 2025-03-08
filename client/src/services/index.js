@@ -135,3 +135,13 @@ export async function fetchStudentAssignedCoursesService(userId) {
   return data;
 }
 
+
+export const addStudentsToCourse = async (courseId, studentEmails) => {
+  try {
+    const response = await axiosInstance.post(`/instructor/course/${courseId}/add-students`, { studentEmails });
+    return response.data;
+  } catch (error) {
+    console.error("Error adding student:", error.response?.data?.message || error.message);
+    throw error;
+  }
+};
