@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Users } from "lucide-react";
-import { addStudentsToCourse, addStudentToCourse } from "@/services";
+import { addStudentsToCourse } from "@/services";
 import { nContext } from "@/context/notification-context";
 
 function InstructorDashboard({ listOfCourses }) {

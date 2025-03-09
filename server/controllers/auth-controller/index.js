@@ -4,11 +4,11 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 const registerUser = async (req, res) => {
-  const { userName, userEmail, password, role,regd,branch } = req.body;
+  const { name, email, password, role,regd,branch } = req.body;
 
   const { success, message } = await registerUserUtility({
-    userName,
-    userEmail,
+    userName: name,
+    userEmail: email,
     password,
     role,
     regd,
@@ -23,9 +23,10 @@ const registerUser = async (req, res) => {
 };
 
 
-const registerUserUtility = async ({userName,userEmail,password,role,regd,branch}) => {
+const registerUserUtility = async ({name,email,password,role,regd,branch}) => {
+
   const existingUser = await User.findOne({
-    $or: [{ userEmail }, { userName }],
+    $or: [{ userName : name.trim() }, { userEmail : email.trim() }],
   });
 
   if (existingUser) {
@@ -34,8 +35,8 @@ const registerUserUtility = async ({userName,userEmail,password,role,regd,branch
 
   const hashPassword = await bcrypt.hash(password, 10);
   const newUser = new User({
-    userName: userName.trim(),
-    userEmail: userEmail.trim(),
+    userName: name.trim(),
+    userEmail: email.trim(),
     role: role.trim(),
     regd: regd.trim(),
     branch: branch.trim(),
@@ -98,7 +99,7 @@ const bulkRegisterUsers = asyncHandler(async (req, res) => {
   async function processBulkData(users) {
       try {
           for (const userData of users) {
-              await registerUserUtility({userName : userData.email, userEmail : userData.email, password : userData.password, role : userData.role, regd : userData.regd, branch : userData.branch});
+              await registerUserUtility({name : userData.name, email : userData.email, password : userData.password, role : userData.role, regd : userData.regd, branch : userData.branch});
           }
           return { success : true, message: 'Bulk registration successful' };
       }
