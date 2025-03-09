@@ -1,55 +1,76 @@
 const Course = require("../../models/Course");
+const StudentCourses = require("../../models/StudentCourses");
 
 const getAllStudentViewCourses = async (req, res) => {
   try {
     const {
-      category = [],
-      level = [],
-      primaryLanguage = [],
+      userId = "",
+      category = "",
+      level = "",
+      primaryLanguage = "",
       sortBy = "title-atoz",
     } = req.query;
 
     console.log(req.query, "req.query");
-      
-    let filters = {};
-    if (category.length) {
-      filters.category = { $in: category.split(",") };
-    }
-    if (level.length) {
-      filters.level = { $in: level.split(",") };
-    }
-    if (primaryLanguage.length) {
-      filters.primaryLanguage = { $in: primaryLanguage.split(",") };
+
+    if (!userId) {
+      return res.status(400).json({ success: false, message: "User ID is required" });
     }
 
-    let sortParam = {};
-    switch (sortBy) {
-      case "title-atoz":
-        sortParam.title = 1;
+    // Find student courses
+    const studentCourses = await StudentCourses.findOne({ userId });
 
-        break;
-      case "title-ztoa":
-        sortParam.title = -1;
-
-        break;
-
-      default:
-        sortParam.title = 1;
-        break;
+    if (!studentCourses || studentCourses.courses.length === 0) {
+      return res.status(200).json({ success: true, data: [] });
     }
 
-    const coursesList = await Course.find(filters).sort(sortParam);
-
-    res.status(200).json({
-      success: true,
-      data: coursesList,
+    // Get all course IDs
+    const courseIds = studentCourses.courses.map(course => course.courseId);
+    
+    // Fetch complete course details
+    let coursesQuery = { _id: { $in: courseIds } };
+    
+    // Apply filters
+    if (category) {
+      coursesQuery.category = { $in: category.split(",") };
+    }
+    if (level) {
+      coursesQuery.level = { $in: level.split(",") };
+    }
+    if (primaryLanguage) {
+      coursesQuery.primaryLanguage = { $in: primaryLanguage.split(",") };
+    }
+    
+    // Get full course details
+    let assignedCourses = await Course.find(coursesQuery);
+    
+    // Merge with enrollment data
+    assignedCourses = assignedCourses.map(course => {
+      const enrollmentInfo = studentCourses.courses.find(
+        c => c.courseId.toString() === course._id.toString()
+      );
+      return {
+        ...course.toObject(),
+        enrollmentDate: enrollmentInfo.dateOfPurchase
+      };
     });
-  } catch (e) {
-    console.log(e);
-    res.status(500).json({
-      success: false,
-      message: "Some error occured!",
+
+    // Apply sorting
+    assignedCourses.sort((a, b) => {
+      switch (sortBy) {
+        case "title-atoz":
+          return a.title.localeCompare(b.title);
+        case "title-ztoa":
+          return b.title.localeCompare(a.title);
+        default:
+          return a.title.localeCompare(b.title);
+      }
     });
+
+    res.status(200).json({ success: true, data: assignedCourses });
+  } catch (error) {
+    console.error("Error fetching assigned courses:", error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
 

@@ -82,6 +82,8 @@ export async function mediaBulkUploadService(formData, onProgressCallback) {
   return data;
 }
 
+
+
 export async function fetchStudentViewCourseListService(query) {
   const { data } = await axiosInstance.get(`/student/course/get?${query}`);
 
@@ -129,12 +131,6 @@ export async function resetCourseProgressService(userId, courseId) {
 
   return data;
 }
-
-export async function fetchStudentAssignedCoursesService(userId) {
-  const { data } = await axiosInstance.get(`/student/assigned-courses/${userId}`);
-  return data;
-}
-
 
 export const addStudentsToCourse = async (courseId, studentEmails) => {
   try {

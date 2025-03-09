@@ -29,7 +29,9 @@ function StudentHomePage() {
   }
 
   async function fetchAllStudentViewCourses() {
-    const response = await fetchStudentViewCourseListService();
+    const userId = auth?.user?._id;
+    const queryParams = new URLSearchParams({ userId }).toString();
+    const response = await fetchStudentViewCourseListService( queryParams );
     if (response?.success) setStudentViewCoursesList(response?.data);
   }
 
@@ -40,6 +42,8 @@ function StudentHomePage() {
   useEffect(() => {
     fetchAllStudentViewCourses();
   }, []);
+
+  console.log(studentViewCoursesList, "studentViewCoursesList");
 
   return (
     <div className="min-h-screen bg-white">
@@ -78,8 +82,9 @@ function StudentHomePage() {
         <h2 className="text-2xl font-bold mb-6">Featured Courses</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {studentViewCoursesList && studentViewCoursesList.length > 0 ? (
-            studentViewCoursesList.map((courseItem) => (
+            studentViewCoursesList.map((courseItem, index) => (
               <div
+                key={index}
                 onClick={() => handleCourseNavigate(courseItem?._id)}
                 className="border rounded-lg overflow-hidden shadow cursor-pointer"
               >
@@ -98,7 +103,7 @@ function StudentHomePage() {
               </div>
             ))
           ) : (
-            <h1>No Courses Found</h1>
+            <h1 className="font-extrabold text-center text-xl"> No Courses Found</h1>
           )}
         </div>
       </section>

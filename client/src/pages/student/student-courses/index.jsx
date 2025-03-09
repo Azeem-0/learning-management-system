@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { AuthContext } from "@/context/auth-context";
 import { StudentContext } from "@/context/student-context";
-import { fetchStudentAssignedCoursesService } from "@/services";
+import { fetchStudentViewCourseListService } from "@/services";
 import { Watch } from "lucide-react";
 import { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -13,8 +13,10 @@ function StudentCoursesPage() {
     useContext(StudentContext);
   const navigate = useNavigate();
 
-  async function fetchStudentAssignedCourses() {
-    const response = await fetchStudentAssignedCoursesService(auth?.user?._id);
+  async function fetchStudentAssignedCourses() {  
+    const userId = auth?.user?._id;
+    const queryParams = new URLSearchParams({ userId }).toString();
+    const response = await fetchStudentViewCourseListService(queryParams);
     if (response?.success) {
       setStudentAssignedCoursesList(response?.data);
     }
@@ -56,7 +58,7 @@ function StudentCoursesPage() {
             </Card>
           ))
         ) : (
-          <h1 className="text-3xl font-bold">No Courses found</h1>
+          <h1 className="font-extrabold text-center text-xl">No Courses found</h1>
         )}
       </div>
     </div>

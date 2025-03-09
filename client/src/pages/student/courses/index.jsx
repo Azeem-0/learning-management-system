@@ -63,8 +63,9 @@ function StudentViewCoursesPage() {
 
   async function fetchAllStudentViewCourses(filters, sort) {
     setLoadingState(true);
-    const query = new URLSearchParams({ ...filters, sortBy: sort });
-    const response = await fetchStudentViewCourseListService(query);
+    const userId = auth?.user?._id;
+    const queryParams = new URLSearchParams({ ...filters, sortBy: sort, userId }).toString();
+    const response = await fetchStudentViewCourseListService(queryParams);
     if (response?.success) {
       setStudentViewCoursesList(response?.data);
     }
@@ -186,7 +187,7 @@ function StudentViewCoursesPage() {
                 </Card>
               ))
             ) : (
-              <h1 className="font-extrabold text-4xl">No Courses Found</h1>
+              <h1 className="font-extrabold text-center text-xl">No Courses Found</h1>
             )}
           </div>
         </main>
