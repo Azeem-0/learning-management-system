@@ -165,3 +165,44 @@ export async function fetchStudentsByCriteria(year, branch) {
     return [];
   }
 }
+export async function createQuizService(quizData) {
+  const { data } = await axiosInstance.post("/quiz", quizData);
+  return data;
+}
+
+export async function fetchInstructorQuizzesService(courseId,instructorId, status) {
+  if (!instructorId) throw new Error("Instructor ID is required");
+
+  const { data } = await axiosInstance.get(`/quiz?instructorId=${instructorId}&status=${status}&courseId=${courseId}`);
+  return data.quizzes;
+}
+
+export async function fetchQuizByIdService(quizId) {
+  const { data } = await axiosInstance.get(`/quiz/${quizId}`);
+  return data;
+}
+
+export async function updateQuizService(quizId, updatedQuizData) {
+  const { data } = await axiosInstance.put(`/quiz/${quizId}`, updatedQuizData);
+  return data;
+}
+
+export async function deleteQuizService(quizId) {
+  const { data } = await axiosInstance.delete(`/quiz/${quizId}`);
+  return data;
+}
+
+export async function assignStudentsToQuizService(payload) {
+  const { data } = await axiosInstance.post("/quiz/assign-students", payload);
+  return data;
+}
+
+export async function submitQuizAttemptService(quizAttemptData) {
+  const { data } = await axiosInstance.post("/quiz/submit-attempt", quizAttemptData);
+  return data;
+}
+
+export async function fetchStudentQuizAttemptsService(userId) {
+  const { data } = await axiosInstance.get(`/quiz/attempts/${userId}`);
+  return data;
+}

@@ -5,7 +5,7 @@ import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { AuthContext } from "@/context/auth-context";
 import { InstructorContext } from "@/context/instructor-context";
 import { fetchInstructorCourseListService } from "@/services";
-import { HomeIcon } from "@radix-ui/react-icons";
+import { HomeIcon, ListBulletIcon } from "@radix-ui/react-icons";
 import {
   BarChart,
   Book,
@@ -15,11 +15,13 @@ import {
   LogIn,
   Code,
   Trophy,
+  ListCheck,
 } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
 import StudentHomePage from "../student/home";
 import AdminBulkRegisterPage from "@/components/admin-components";
 import ContestsPage from "../contests";
+import QuizCreator from "@/components/instructor-view/quiz";
 
 function InstructorDashboardpage() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -62,10 +64,10 @@ function InstructorDashboardpage() {
       component: <ContestsPage />,
     },
     {
-      icon: Code,
-      label: "Playground",
-      value: "playground",
-      component: null,
+      icon : ListBulletIcon,
+      label: "Quiz",
+      value: "quiz",
+      component: <QuizCreator listOfCourses={instructorCoursesList}/>
     },
     {
       icon: LogIn,
@@ -103,10 +105,6 @@ function InstructorDashboardpage() {
                     : menuItem.value === "home"
                     ? () => {
                         window.location.href = "/";
-                      }
-                    : menuItem.value === "playground"
-                    ? () => {
-                        window.location.href = "/playground";
                       }
                     : () => setActiveTab(menuItem.value)
                 }
