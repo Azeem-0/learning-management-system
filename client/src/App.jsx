@@ -13,92 +13,103 @@ import StudentViewCourseDetailsPage from "./pages/student/course-details";
 // import PaypalPaymentReturnPage from "./pages/student/payment-return";
 import StudentCoursesPage from "./pages/student/student-courses";
 import StudentViewCourseProgressPage from "./pages/student/course-progress";
-import 'react-toastify/dist/ReactToastify.css';
+import PlaygroundPage from "./pages/playground";
+import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
 
 function App() {
   const { auth } = useContext(AuthContext);
 
   return (
-    <>  
-    <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} theme="light" />
-    <Routes>
-      {/* working */}
-      <Route
-        path="/auth"
-        element={
-          <RouteGuard
-            element={<AuthPage />}
-            authenticated={auth?.authenticate}
-            user={auth?.user}
-          />
-        }
+    <>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        theme="light"
       />
-
-      {/* working */}
-      <Route
-        path="/instructor"
-        element={
-          <RouteGuard
-            element={<InstructorDashboardpage />}
-            authenticated={auth?.authenticate}
-            user={auth?.user}
-          />
-        }
-      />
-
-      {/* working */}
-      <Route
-        path="/instructor/create-new-course"
-        element={
-          <RouteGuard
-            element={<AddNewCoursePage />}
-            authenticated={auth?.authenticate}
-            user={auth?.user}
-          />
-        }
-      />
-
-
-      {/* have to check */}
-      <Route
-        path="/instructor/edit-course/:courseId"
-        element={
-          <RouteGuard
-            element={<AddNewCoursePage />}
-            authenticated={auth?.authenticate}
-            user={auth?.user}
-          />
-        }
-      />
-
-      {/* working */}
-      <Route
-        path="/"
-        element={
-          <RouteGuard
-            element={<StudentViewCommonLayout />}
-            authenticated={auth?.authenticate}
-            user={auth?.user}
-          />
-        }
-      >
-        <Route path="" element={<StudentHomePage />} />
-        <Route path="home" element={<StudentHomePage />} />
-        <Route path="courses" element={<StudentViewCoursesPage />} />
+      <Routes>
+        {/* working */}
         <Route
-          path="course/details/:id"
-          element={<StudentViewCourseDetailsPage />}
+          path="/auth"
+          element={
+            <RouteGuard
+              element={<AuthPage />}
+              authenticated={auth?.authenticate}
+              user={auth?.user}
+            />
+          }
         />
-        {/* <Route path="payment-return" element={<PaypalPaymentReturnPage />} /> */}
-        <Route path="student-courses" element={<StudentCoursesPage />} />
+
+        {/* working */}
         <Route
-          path="course-progress/:id"
-          element={<StudentViewCourseProgressPage />}
+          path="/instructor"
+          element={
+            <RouteGuard
+              element={<InstructorDashboardpage />}
+              authenticated={auth?.authenticate}
+              user={auth?.user}
+            />
+          }
         />
-      </Route>
-      <Route path="*" element={<NotFoundPage />} />
-    </Routes>
+
+        {/* Playground Route */}
+        <Route path="/playground" element={<PlaygroundPage />} />
+
+        {/* working */}
+        <Route
+          path="/instructor/create-new-course"
+          element={
+            <RouteGuard
+              element={<AddNewCoursePage />}
+              authenticated={auth?.authenticate}
+              user={auth?.user}
+            />
+          }
+        />
+
+        {/* have to check */}
+        <Route
+          path="/instructor/edit-course/:courseId"
+          element={
+            <RouteGuard
+              element={<AddNewCoursePage />}
+              authenticated={auth?.authenticate}
+              user={auth?.user}
+            />
+          }
+        />
+
+        {/* working */}
+        <Route
+          path="/"
+          element={
+            <RouteGuard
+              element={<StudentViewCommonLayout />}
+              authenticated={auth?.authenticate}
+              user={auth?.user}
+            />
+          }
+        >
+          <Route path="" element={<StudentHomePage />} />
+          <Route path="home" element={<StudentHomePage />} />
+          <Route path="courses" element={<StudentViewCoursesPage />} />
+          <Route
+            path="course/details/:id"
+            element={<StudentViewCourseDetailsPage />}
+          />
+          {/* <Route path="payment-return" element={<PaypalPaymentReturnPage />} /> */}
+          <Route path="student-courses" element={<StudentCoursesPage />} />
+          <Route
+            path="course-progress/:id"
+            element={<StudentViewCourseProgressPage />}
+          />
+        </Route>
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
     </>
   );
 }
