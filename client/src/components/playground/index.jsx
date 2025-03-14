@@ -81,8 +81,9 @@ public class Main {
 }`,
 };
 
-const CodePlayground = () => {
+const CodePlayground = ({ contest, selectedProblem }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [language, setLanguage] = useLocalStorage(
     "code-playground-language",
     "javascript"
@@ -138,7 +139,6 @@ const CodePlayground = () => {
     const startTime = performance.now();
 
     try {
-      const location = useLocation();
       const isContestProblem = location.pathname.includes("/contests/");
 
       if (isContestProblem) {
@@ -459,7 +459,7 @@ const CodePlayground = () => {
             onValueChange={setActiveTab}
             className="h-full flex flex-col"
           >
-            <div className="p-3 border-b flex items-center justify-between bg-gray-50 dark:bg-gray-700">
+            <div className="w-full p-2 border-b flex items-center justify-between bg-gray-50 dark:bg-gray-700">
               <TabsList className="grid w-1/2 grid-cols-2">
                 <TabsTrigger value="output" className="flex items-center gap-2">
                   Output

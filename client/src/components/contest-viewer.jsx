@@ -4,13 +4,15 @@ import CodePlayground from "./playground";
 import { useEffect, useState } from "react";
 
 function ContestViewer({ contest }) {
+  const [selectedProbemIndex, setSelectedProblemIndex] = useState(0);
+
   useEffect(() => {
     console.log(contest.problems);
   }, []);
+
   if (!contest) {
     return null;
   }
-  const [selectedProbemIndex, setSelectedProblemIndex] = useState(0);
 
   return (
     <div className="space-y-4">
@@ -105,7 +107,10 @@ function ContestViewer({ contest }) {
                   </div>
                 </CardContent>
               </Card>
-              <CodePlayground />
+              <CodePlayground
+                contest={contest}
+                selectedProblem={contest.problems[selectedProbemIndex]}
+              />
             </div>
           ) : (
             <div>Select a problem to start coding</div>
