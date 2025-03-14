@@ -3,9 +3,7 @@ import banner from "../../../assets/banner-img.png";
 import { Button } from "@/components/ui/button";
 import { useContext, useEffect } from "react";
 import { StudentContext } from "@/context/student-context";
-import {
-  fetchStudentViewCourseListService,
-} from "@/services";
+import { fetchStudentViewCourseListService } from "@/services";
 import { AuthContext } from "@/context/auth-context";
 import { useNavigate } from "react-router-dom";
 
@@ -31,7 +29,7 @@ function StudentHomePage() {
   async function fetchAllStudentViewCourses() {
     const userId = auth?.user?._id;
     const queryParams = new URLSearchParams({ userId }).toString();
-    const response = await fetchStudentViewCourseListService( queryParams );
+    const response = await fetchStudentViewCourseListService(queryParams);
     if (response?.success) setStudentViewCoursesList(response?.data);
   }
 
@@ -53,6 +51,12 @@ function StudentHomePage() {
           <p className="text-xl">
             Skills for your present and your future. Get Started with US
           </p>
+          <Button
+            onClick={() => navigate("/playground")}
+            className="mt-4 bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            Try Our Code Playground
+          </Button>
         </div>
         <div className="lg:w-full mb-8 lg:mb-0">
           <img
@@ -103,7 +107,10 @@ function StudentHomePage() {
               </div>
             ))
           ) : (
-            <h1 className="font-extrabold text-center text-xl"> No Courses Found</h1>
+            <h1 className="font-extrabold text-center text-xl">
+              {" "}
+              No Courses Found
+            </h1>
           )}
         </div>
       </section>
