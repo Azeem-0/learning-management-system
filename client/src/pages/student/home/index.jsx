@@ -29,8 +29,10 @@ function StudentHomePage() {
   }
 
   async function fetchAllStudentViewCourses() {
-    const userId = auth?.user?._id;
+    const userId = auth?.user?._id;    
     const queryParams = new URLSearchParams({ userId }).toString();
+    console.log(queryParams, "queryParams");
+
     const response = await fetchStudentViewCourseListService( queryParams );
     if (response?.success) setStudentViewCoursesList(response?.data);
   }
