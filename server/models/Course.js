@@ -27,6 +27,7 @@ const CourseSchema = new mongoose.Schema({
     },
   ],
   curriculum: [LectureSchema],
+  quizzes: [{ type: mongoose.Schema.Types.ObjectId, ref: "Quiz" }],
   isPublised: Boolean,
 });
 
