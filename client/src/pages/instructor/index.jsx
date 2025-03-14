@@ -14,10 +14,12 @@ import {
   LogInIcon,
   LogIn,
   Code,
+  Trophy,
 } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
 import StudentHomePage from "../student/home";
 import AdminBulkRegisterPage from "@/components/admin-components";
+import ContestsPage from "../contests";
 
 function InstructorDashboardpage() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -52,6 +54,12 @@ function InstructorDashboardpage() {
       label: "Courses",
       value: "courses",
       component: <InstructorCourses listOfCourses={instructorCoursesList} />,
+    },
+    {
+      icon: Trophy,
+      label: "Contests",
+      value: "contests",
+      component: <ContestsPage />,
     },
     {
       icon: Code,
