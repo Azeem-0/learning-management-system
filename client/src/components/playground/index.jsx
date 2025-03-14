@@ -14,12 +14,22 @@ const LANGUAGE_IDS = {
   javascript: 63,
   python: 71,
   java: 62,
+  c: 50,
+  cpp: 54,
+  typescript: 74,
+  ruby: 72,
+  go: 60,
+  rust: 73,
+  csharp: 51,
+  php: 68,
+  swift: 83,
+  kotlin: 78,
 };
 
 const CodePlayground = () => {
   const [language, setLanguage] = useState("javascript");
   const [theme, setTheme] = useState("vs-dark");
-  const [code, setCode] = useState("// Start coding here\n");
+  const [code, setCode] = useState("");
   const [output, setOutput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -29,7 +39,6 @@ const CodePlayground = () => {
 
   const handleLanguageChange = (value) => {
     setLanguage(value);
-    setCode("// Start coding here\n");
   };
 
   const handleThemeChange = (value) => {
@@ -104,6 +113,16 @@ const CodePlayground = () => {
             <SelectItem value="javascript">JavaScript</SelectItem>
             <SelectItem value="python">Python</SelectItem>
             <SelectItem value="java">Java</SelectItem>
+            <SelectItem value="c">C</SelectItem>
+            <SelectItem value="cpp">C++</SelectItem>
+            <SelectItem value="typescript">TypeScript</SelectItem>
+            <SelectItem value="ruby">Ruby</SelectItem>
+            <SelectItem value="go">Go</SelectItem>
+            <SelectItem value="rust">Rust</SelectItem>
+            <SelectItem value="csharp">C#</SelectItem>
+            <SelectItem value="php">PHP</SelectItem>
+            <SelectItem value="swift">Swift</SelectItem>
+            <SelectItem value="kotlin">Kotlin</SelectItem>
           </SelectContent>
         </Select>
 
