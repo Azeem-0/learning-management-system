@@ -1,17 +1,16 @@
-import axiosInstance from "@/api/axiosInstance";
-import { Button } from "@/components/ui/button";
+import { useContext, useEffect, useState } from "react";
+import { AuthContext } from "../../context/auth-context";
+import { Button } from "../../components/ui/button";
 import {
   Card,
   CardContent,
-  CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { AuthContext } from "@/context/auth-context";
-import { useContext, useEffect, useState } from "react";
+} from "../../components/ui/card";
+import { Input } from "../../components/ui/input";
+import { Label } from "../../components/ui/label";
+import { Textarea } from "../../components/ui/textarea";
+import axiosInstance from "@/api/axiosInstance";
 
 function ContestsPage() {
   const { auth } = useContext(AuthContext);
@@ -21,31 +20,74 @@ function ContestsPage() {
   const [newContest, setNewContest] = useState({
     title: "",
     description: "",
-    problemStatement: "",
-    inputFormat: "",
-    outputFormat: "",
-    sampleInput: "",
-    sampleOutput: "",
-    timeLimit: 1,
-    memoryLimit: 256,
+    problems: [
+      {
+        title: "",
+        description: "",
+        problemStatement: "",
+        inputFormat: "",
+        outputFormat: "",
+        sampleInput: "",
+        sampleOutput: "",
+        timeLimit: 1,
+        memoryLimit: 256,
+      },
+    ],
     startTime: "",
     endTime: "",
   });
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e, problemIndex = null) => {
     const { name, value } = e.target;
+    if (problemIndex !== null) {
+      setNewContest((prev) => ({
+        ...prev,
+        problems: prev.problems.map((problem, index) =>
+          index === problemIndex ? { ...problem, [name]: value } : problem
+        ),
+      }));
+    } else {
+      setNewContest((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
+  };
+
+  const addProblem = () => {
     setNewContest((prev) => ({
       ...prev,
-      [name]: value,
+      problems: [
+        ...prev.problems,
+        {
+          title: "",
+          description: "",
+          problemStatement: "",
+          inputFormat: "",
+          outputFormat: "",
+          sampleInput: "",
+          sampleOutput: "",
+          timeLimit: 1,
+          memoryLimit: 256,
+        },
+      ],
     }));
+  };
+
+  const removeProblem = (index) => {
+    if (newContest.problems.length > 1) {
+      setNewContest((prev) => ({
+        ...prev,
+        problems: prev.problems.filter((_, i) => i !== index),
+      }));
+    }
   };
 
   const fetchContests = async () => {
     try {
       const response = await axiosInstance.get("/contests/all");
-      const data = await response.json();
-      if (data.success) {
-        setContests(data.data);
+      if (response.data.success) {
+        setContests(response.data.data);
       }
     } catch (error) {
       console.error("Error fetching contests:", error);
@@ -56,34 +98,33 @@ function ContestsPage() {
     try {
       setLoading(true);
       const response = await axiosInstance.post("/contests/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${auth?.token}`,
-        },
         body: newContest,
       });
 
-      const data = await response.json();
-
-      if (data.success) {
-        setContests((prev) => [...prev, data.data]);
+      if (response.data.success) {
+        setContests((prev) => [...prev, response.data.data]);
         setShowCreateForm(false);
         setNewContest({
           title: "",
           description: "",
-          problemStatement: "",
-          inputFormat: "",
-          outputFormat: "",
-          sampleInput: "",
-          sampleOutput: "",
-          timeLimit: 1,
-          memoryLimit: 256,
+          problems: [
+            {
+              title: "",
+              description: "",
+              problemStatement: "",
+              inputFormat: "",
+              outputFormat: "",
+              sampleInput: "",
+              sampleOutput: "",
+              timeLimit: 1,
+              memoryLimit: 256,
+            },
+          ],
           startTime: "",
           endTime: "",
         });
       } else {
-        alert(data.message || "Error creating contest");
+        alert(response.data.message || "Error creating contest");
       }
     } catch (error) {
       console.error("Error creating contest:", error);
@@ -127,7 +168,7 @@ function ContestsPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description">Contest Description</Label>
               <Textarea
                 id="description"
                 name="description"
@@ -137,157 +178,218 @@ function ContestsPage() {
                 required
               />
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="problemStatement">Problem Statement</Label>
-              <Textarea
-                id="problemStatement"
-                name="problemStatement"
-                value={newContest.problemStatement}
-                onChange={handleInputChange}
-                placeholder="Enter the problem statement"
-                required
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="inputFormat">Input Format</Label>
-                <Textarea
-                  id="inputFormat"
-                  name="inputFormat"
-                  value={newContest.inputFormat}
-                  onChange={handleInputChange}
-                  placeholder="Describe input format"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="outputFormat">Output Format</Label>
-                <Textarea
-                  id="outputFormat"
-                  name="outputFormat"
-                  value={newContest.outputFormat}
-                  onChange={handleInputChange}
-                  placeholder="Describe output format"
-                  required
-                />
+              <Label>Contest Schedule</Label>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="startTime">Start Time</Label>
+                  <Input
+                    id="startTime"
+                    name="startTime"
+                    type="datetime-local"
+                    value={newContest.startTime}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="endTime">End Time</Label>
+                  <Input
+                    id="endTime"
+                    name="endTime"
+                    type="datetime-local"
+                    value={newContest.endTime}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="sampleInput">Sample Input</Label>
-                <Textarea
-                  id="sampleInput"
-                  name="sampleInput"
-                  value={newContest.sampleInput}
-                  onChange={handleInputChange}
-                  placeholder="Provide sample input"
-                  required
-                />
+
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <Label>Problems</Label>
+                <Button
+                  onClick={addProblem}
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                >
+                  Add Problem
+                </Button>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="sampleOutput">Sample Output</Label>
-                <Textarea
-                  id="sampleOutput"
-                  name="sampleOutput"
-                  value={newContest.sampleOutput}
-                  onChange={handleInputChange}
-                  placeholder="Provide sample output"
-                  required
-                />
-              </div>
+
+              {newContest.problems.map((problem, index) => (
+                <Card key={index} className="p-4">
+                  <CardHeader className="flex flex-row justify-between items-center">
+                    <CardTitle>Problem {index + 1}</CardTitle>
+                    {newContest.problems.length > 1 && (
+                      <Button
+                        onClick={() => removeProblem(index)}
+                        variant="destructive"
+                        size="sm"
+                      >
+                        Remove Problem
+                      </Button>
+                    )}
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor={`problem-${index}-title`}>
+                        Problem Title
+                      </Label>
+                      <Input
+                        id={`problem-${index}-title`}
+                        name="title"
+                        value={problem.title}
+                        onChange={(e) => handleInputChange(e, index)}
+                        placeholder="Enter problem title"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor={`problem-${index}-description`}>
+                        Problem Description
+                      </Label>
+                      <Textarea
+                        id={`problem-${index}-description`}
+                        name="description"
+                        value={problem.description}
+                        onChange={(e) => handleInputChange(e, index)}
+                        placeholder="Enter problem description"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor={`problem-${index}-statement`}>
+                        Problem Statement
+                      </Label>
+                      <Textarea
+                        id={`problem-${index}-statement`}
+                        name="problemStatement"
+                        value={problem.problemStatement}
+                        onChange={(e) => handleInputChange(e, index)}
+                        placeholder="Enter the problem statement"
+                        required
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor={`problem-${index}-input-format`}>
+                          Input Format
+                        </Label>
+                        <Textarea
+                          id={`problem-${index}-input-format`}
+                          name="inputFormat"
+                          value={problem.inputFormat}
+                          onChange={(e) => handleInputChange(e, index)}
+                          placeholder="Describe input format"
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor={`problem-${index}-output-format`}>
+                          Output Format
+                        </Label>
+                        <Textarea
+                          id={`problem-${index}-output-format`}
+                          name="outputFormat"
+                          value={problem.outputFormat}
+                          onChange={(e) => handleInputChange(e, index)}
+                          placeholder="Describe output format"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor={`problem-${index}-sample-input`}>
+                          Sample Input
+                        </Label>
+                        <Textarea
+                          id={`problem-${index}-sample-input`}
+                          name="sampleInput"
+                          value={problem.sampleInput}
+                          onChange={(e) => handleInputChange(e, index)}
+                          placeholder="Provide sample input"
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor={`problem-${index}-sample-output`}>
+                          Sample Output
+                        </Label>
+                        <Textarea
+                          id={`problem-${index}-sample-output`}
+                          name="sampleOutput"
+                          value={problem.sampleOutput}
+                          onChange={(e) => handleInputChange(e, index)}
+                          placeholder="Provide sample output"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor={`problem-${index}-time-limit`}>
+                          Time Limit (seconds)
+                        </Label>
+                        <Input
+                          id={`problem-${index}-time-limit`}
+                          name="timeLimit"
+                          type="number"
+                          min="1"
+                          value={problem.timeLimit}
+                          onChange={(e) => handleInputChange(e, index)}
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor={`problem-${index}-memory-limit`}>
+                          Memory Limit (MB)
+                        </Label>
+                        <Input
+                          id={`problem-${index}-memory-limit`}
+                          name="memoryLimit"
+                          type="number"
+                          min="64"
+                          value={problem.memoryLimit}
+                          onChange={(e) => handleInputChange(e, index)}
+                          required
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="timeLimit">Time Limit (seconds)</Label>
-                <Input
-                  type="number"
-                  id="timeLimit"
-                  name="timeLimit"
-                  value={newContest.timeLimit}
-                  onChange={handleInputChange}
-                  min="1"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="memoryLimit">Memory Limit (MB)</Label>
-                <Input
-                  type="number"
-                  id="memoryLimit"
-                  name="memoryLimit"
-                  value={newContest.memoryLimit}
-                  onChange={handleInputChange}
-                  min="64"
-                  required
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="startTime">Start Time</Label>
-                <Input
-                  type="datetime-local"
-                  id="startTime"
-                  name="startTime"
-                  value={newContest.startTime}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="endTime">End Time</Label>
-                <Input
-                  type="datetime-local"
-                  id="endTime"
-                  name="endTime"
-                  value={newContest.endTime}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-            </div>
-          </CardContent>
-          <CardFooter>
+
             <Button
               onClick={handleCreateContest}
-              className="bg-green-600 hover:bg-green-700"
+              className="w-full bg-blue-600 hover:bg-blue-700"
               disabled={loading}
             >
               {loading ? "Creating..." : "Create Contest"}
             </Button>
-          </CardFooter>
+          </CardContent>
         </Card>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {contests.map((contest) => (
-          <Card key={contest._id}>
+          <Card key={contest._id} className="hover:shadow-lg transition-shadow">
             <CardHeader>
               <CardTitle>{contest.title}</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-600">{contest.description}</p>
-              <div className="mt-4 text-sm">
-                <p>
-                  <strong>Start:</strong>{" "}
-                  {new Date(contest.startTime).toLocaleString()}
-                </p>
-                <p>
-                  <strong>End:</strong>{" "}
-                  {new Date(contest.endTime).toLocaleString()}
-                </p>
+              <p className="text-gray-600 mb-4">{contest.description}</p>
+              <div className="text-sm text-gray-500">
+                <p>Problems: {contest.problems.length}</p>
+                <p>Start: {new Date(contest.startTime).toLocaleString()}</p>
+                <p>End: {new Date(contest.endTime).toLocaleString()}</p>
               </div>
             </CardContent>
-            <CardFooter>
-              <Button
-                onClick={() => {
-                  // TODO: Implement contest participation logic
-                }}
-                className="w-full"
-              >
-                Participate
-              </Button>
-            </CardFooter>
           </Card>
         ))}
       </div>
