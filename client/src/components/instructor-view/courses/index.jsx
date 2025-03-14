@@ -13,6 +13,8 @@ import {
   courseLandingInitialFormData,
 } from "@/config";
 import { InstructorContext } from "@/context/instructor-context";
+import { nContext } from "@/context/notification-context";
+import { deleteCourseService } from "@/services";
 import { Delete, Edit } from "lucide-react";
 import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
@@ -24,6 +26,23 @@ function InstructorCourses({ listOfCourses }) {
     setCourseLandingFormData,
     setCourseCurriculumFormData,
   } = useContext(InstructorContext);
+
+  const {notify} = useContext(nContext);
+
+  async function handleDeleteLecture(course_id) {
+    try {
+      const response = await deleteCourseService(course_id);
+
+      if (response?.success) {
+        notify("The lecture has been successfully deleted.");
+      } else {
+        notify("Failed to delete the lecture.");
+      }
+    } catch (error) {
+      console.error("Error deleting lecture:", error);
+      notify("Failed to delete the lecture.");
+    }
+  } 
 
   return (
     <Card>
@@ -53,10 +72,10 @@ function InstructorCourses({ listOfCourses }) {
             </TableHeader>
             <TableBody>
               {listOfCourses && listOfCourses.length > 0
-                ? listOfCourses.map((course) => (
-                    <TableRow>
+                ? listOfCourses.map((course, index) => (
+                    <TableRow key={index}>
                       <TableCell className="font-medium">
-                        {course?.title}
+                        {course?.title.length > 20 ? `${course?.title.substring(0, 20)}...` : course?.title}
                       </TableCell>
                       <TableCell>{course?.students?.length}</TableCell>
                       <TableCell className="text-right">
@@ -69,7 +88,7 @@ function InstructorCourses({ listOfCourses }) {
                         >
                           <Edit className="h-6 w-6" />
                         </Button>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" onClick={() => handleDeleteLecture(course._id)}>
                           <Delete className="h-6 w-6" />
                         </Button>
                       </TableCell>

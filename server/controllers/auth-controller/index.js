@@ -23,7 +23,7 @@ const registerUser = async (req, res) => {
 };
 
 
-const registerUserUtility = async ({name,email,password,role,regd,branch}) => {
+const registerUserUtility = async ({name,email,password,role,regd,branch,year}) => {
 
   const existingUser = await User.findOne({
     $or: [{ userName : name.trim() }, { userEmail : email.trim() }],
@@ -40,6 +40,7 @@ const registerUserUtility = async ({name,email,password,role,regd,branch}) => {
     role: role.trim(),
     regd: regd.trim(),
     branch: branch.trim(),
+    year: year.trim(),
     password: hashPassword,
   });
 
@@ -99,11 +100,11 @@ const bulkRegisterUsers = asyncHandler(async (req, res) => {
   async function processBulkData(users) {
       try {
           for (const userData of users) {
-              await registerUserUtility({name : userData.name, email : userData.email, password : userData.password, role : userData.role, regd : userData.regd, branch : userData.branch});
+              await registerUserUtility({name : userData.name, email : userData.email, password : userData.password, role : userData.role, regd : userData.regd, branch : userData.branch, year : userData.year});
           }
           return { success : true, message: 'Bulk registration successful' };
       }
-      catch (error){
+      catch (error){  
           console.log("While bulk: "+error.message);
           return {success : false, message: error.message };
       }

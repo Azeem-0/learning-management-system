@@ -12,7 +12,7 @@ import {
   mediaDeleteService,
   mediaUploadService,
 } from "@/services";
-import { Upload } from "lucide-react";
+import { X,Upload } from "lucide-react";
 import { useContext, useRef } from "react";
 
 function CourseCurriculum() {
@@ -264,5 +264,4 @@ function CourseCurriculum() {
     </Card>
   );
 }
-
 export default CourseCurriculum;

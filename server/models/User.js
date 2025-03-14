@@ -7,6 +7,7 @@ const UserSchema = new mongoose.Schema({
   role: String,
   regd: String,
   branch: String,
+  year:String, 
 });
 
 module.exports = mongoose.model("User", UserSchema);

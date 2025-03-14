@@ -1,6 +1,7 @@
 const Course = require("../../models/Course");
 const User = require("../../models/User");
 const StudentCourses = require("../../models/StudentCourses");
+const CourseProgress = require("../../models/CourseProgress");
 
 const addNewCourse = async (req, res) => {
   try {
@@ -98,7 +99,6 @@ const updateCourseByID = async (req, res) => {
   }
 };
 
-
 const addStudentsToCourse = async (req, res) => {
   try {
     const { courseId } = req.params;
@@ -184,6 +184,42 @@ const addStudentsToCourse = async (req, res) => {
 };
 
 
+const deleteCourse = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Delete the course itself
+    const course = await Course.findByIdAndDelete(id);
+
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found",
+      });
+    }
+
+    // Remove course from StudentCourses collection
+    await StudentCourses.updateMany(
+      { "courses.courseId": id },
+      { $pull: { courses: { courseId: id } } }
+    );
+
+    // Delete course progress data
+    await CourseProgress.deleteMany({ courseId: id });
+
+    res.status(200).json({
+      success: true,
+      message: "Course and all related data deleted successfully",
+      data: course,
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({
+      success: false,
+      message: "Some error occurred!",
+    });
+  }
+};
 
 
 module.exports = {
@@ -192,4 +228,5 @@ module.exports = {
   updateCourseByID,
   getCourseDetailsByID,
   addStudentsToCourse,
+  deleteCourse,
 };

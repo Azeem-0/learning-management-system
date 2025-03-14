@@ -1,5 +1,6 @@
 const Course = require("../../models/Course");
 const StudentCourses = require("../../models/StudentCourses");
+const User = require("../../models/User");
 
 const getAllStudentViewCourses = async (req, res) => {
   try {
@@ -13,47 +14,57 @@ const getAllStudentViewCourses = async (req, res) => {
 
     console.log(req.query, "req.query");
 
-    if (!userId) {
-      return res.status(400).json({ success: false, message: "User ID is required" });
-    }
+    let assignedCourses = [];
 
-    // Find student courses
-    const studentCourses = await StudentCourses.findOne({ userId });
+    // Check if user is an instructor
+    const user = await User.findOne({ _id: userId });
 
-    if (!studentCourses || studentCourses.courses.length === 0) {
-      return res.status(200).json({ success: true, data: [] });
-    }
+    if (user?.role === "instructor") {
+      // Fetch all courses created by the instructor
+      let coursesQuery = {};
 
-    // Get all course IDs
-    const courseIds = studentCourses.courses.map(course => course.courseId);
-    
-    // Fetch complete course details
-    let coursesQuery = { _id: { $in: courseIds } };
-    
-    // Apply filters
-    if (category) {
-      coursesQuery.category = { $in: category.split(",") };
+      if (category) {
+        coursesQuery.category = { $in: category.split(",") };
+      }
+      if (level) {
+        coursesQuery.level = { $in: level.split(",") };
+      }
+      if (primaryLanguage) {
+        coursesQuery.primaryLanguage = { $in: primaryLanguage.split(",") };
+      }
+
+      assignedCourses = await Course.find(coursesQuery);
+    } else {
+      // Find student courses
+      const studentCourses = await StudentCourses.findOne({ userId });
+      if (studentCourses) {
+        const courseIds = studentCourses.courses.map(course => course.courseId);
+        let coursesQuery = { _id: { $in: courseIds } };
+
+        if (category) {
+          coursesQuery.category = { $in: category.split(",") };
+        }
+        if (level) {
+          coursesQuery.level = { $in: level.split(",") };
+        }
+        if (primaryLanguage) {
+          coursesQuery.primaryLanguage = { $in: primaryLanguage.split(",") };
+        }
+
+        assignedCourses = await Course.find(coursesQuery);
+
+        // Merge with enrollment data
+        assignedCourses = assignedCourses.map(course => {
+          const enrollmentInfo = studentCourses.courses.find(
+            c => c.courseId.toString() === course._id.toString()
+          );
+          return {
+            ...course.toObject(),
+            enrollmentDate: enrollmentInfo?.dateOfPurchase || null,
+          };
+        });
+      }
     }
-    if (level) {
-      coursesQuery.level = { $in: level.split(",") };
-    }
-    if (primaryLanguage) {
-      coursesQuery.primaryLanguage = { $in: primaryLanguage.split(",") };
-    }
-    
-    // Get full course details
-    let assignedCourses = await Course.find(coursesQuery);
-    
-    // Merge with enrollment data
-    assignedCourses = assignedCourses.map(course => {
-      const enrollmentInfo = studentCourses.courses.find(
-        c => c.courseId.toString() === course._id.toString()
-      );
-      return {
-        ...course.toObject(),
-        enrollmentDate: enrollmentInfo.dateOfPurchase
-      };
-    });
 
     // Apply sorting
     assignedCourses.sort((a, b) => {
@@ -73,6 +84,7 @@ const getAllStudentViewCourses = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
+
 
 const getStudentViewCourseDetails = async (req, res) => {
   try {
