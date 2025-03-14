@@ -6,7 +6,15 @@ import { AuthContext } from "@/context/auth-context";
 import { InstructorContext } from "@/context/instructor-context";
 import { fetchInstructorCourseListService } from "@/services";
 import { HomeIcon } from "@radix-ui/react-icons";
-import { BarChart, Book, Home, LogOut,LogInIcon, LogIn } from "lucide-react";
+import {
+  BarChart,
+  Book,
+  Home,
+  LogOut,
+  LogInIcon,
+  LogIn,
+  Code,
+} from "lucide-react";
 import { useContext, useEffect, useState } from "react";
 import StudentHomePage from "../student/home";
 import AdminBulkRegisterPage from "@/components/admin-components";
@@ -31,7 +39,7 @@ function InstructorDashboardpage() {
       icon: HomeIcon,
       label: "Home",
       value: "home",
-      component: null
+      component: null,
     },
     {
       icon: BarChart,
@@ -46,10 +54,16 @@ function InstructorDashboardpage() {
       component: <InstructorCourses listOfCourses={instructorCoursesList} />,
     },
     {
-      icon : LogIn,
-      label: "Bulk Register", 
+      icon: Code,
+      label: "Playground",
+      value: "playground",
+      component: null,
+    },
+    {
+      icon: LogIn,
+      label: "Bulk Register",
       value: "bulk register",
-      component: <AdminBulkRegisterPage />
+      component: <AdminBulkRegisterPage />,
     },
     {
       icon: LogOut,
@@ -63,8 +77,6 @@ function InstructorDashboardpage() {
     resetCredentials();
     sessionStorage.clear();
   }
-
-  console.log(instructorCoursesList, "instructorCoursesList");
 
   return (
     <div className="flex h-full min-h-screen bg-gray-100">
@@ -84,13 +96,17 @@ function InstructorDashboardpage() {
                     ? () => {
                         window.location.href = "/";
                       }
+                    : menuItem.value === "playground"
+                    ? () => {
+                        window.location.href = "/playground";
+                      }
                     : () => setActiveTab(menuItem.value)
                 }
               >
                 <menuItem.icon className="mr-2 h-4 w-4" />
                 {menuItem.label}
               </Button>
-            ))} 
+            ))}
           </nav>
         </div>
       </aside>
