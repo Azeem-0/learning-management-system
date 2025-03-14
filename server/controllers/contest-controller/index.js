@@ -1,48 +1,47 @@
 const Contest = require("../../models/Contest");
 
 const createContest = async (req, res) => {
-  console.log("Body: ", req.body.body);
   try {
-    const {
-      title,
-      description,
-      problemStatement,
-      inputFormat,
-      outputFormat,
-      sampleInput,
-      sampleOutput,
-      timeLimit,
-      memoryLimit,
-      startTime,
-      endTime,
-    } = req.body.body;
+    const { title, description, problems, startTime, endTime } = req.body.body;
+
     if (
       !title ||
       !description ||
-      !problemStatement ||
-      !inputFormat ||
-      !outputFormat ||
-      !sampleInput ||
-      !sampleOutput ||
+      !problems ||
+      !Array.isArray(problems) ||
+      problems.length === 0 ||
       !startTime ||
       !endTime
     ) {
       return res.status(400).json({
         success: false,
-        message: "All required fields must be provided",
+        message:
+          "All required fields must be provided and at least one problem is required",
       });
+    }
+
+    // Validate each problem
+    for (const problem of problems) {
+      if (
+        !problem.title ||
+        !problem.description ||
+        !problem.problemStatement ||
+        !problem.inputFormat ||
+        !problem.outputFormat ||
+        !problem.sampleInput ||
+        !problem.sampleOutput
+      ) {
+        return res.status(400).json({
+          success: false,
+          message: "All problem fields must be provided for each problem",
+        });
+      }
     }
 
     const contest = await Contest.create({
       title,
       description,
-      problemStatement,
-      inputFormat,
-      outputFormat,
-      sampleInput,
-      sampleOutput,
-      timeLimit,
-      memoryLimit,
+      problems,
       startTime,
       endTime,
       createdBy: req.user._id,
