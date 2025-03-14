@@ -392,6 +392,12 @@ const CodePlayground = () => {
                 formatOnPaste: true,
                 formatOnType: true,
               }}
+              onKeyDown={(e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+                  e.preventDefault();
+                  handleRunCode();
+                }
+              }}
             />
           </div>
         </motion.div>
@@ -460,10 +466,6 @@ const CodePlayground = () => {
                     <Play className="h-12 w-12 mb-4 opacity-20" />
                     <p className="text-center">
                       Run your code to see the output here
-                    </p>
-                    <p className="text-sm mt-2 text-center max-w-md">
-                      Press the Run button or use the keyboard shortcut
-                      Ctrl+Enter
                     </p>
                   </div>
                 )}
