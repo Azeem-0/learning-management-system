@@ -14,6 +14,7 @@ import StudentViewCourseDetailsPage from "./pages/student/course-details";
 import StudentCoursesPage from "./pages/student/student-courses";
 import StudentViewCourseProgressPage from "./pages/student/course-progress";
 import PlaygroundPage from "./pages/playground";
+import ContestsPage from "./pages/contests";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
 
@@ -97,6 +98,7 @@ function App() {
           <Route path="" element={<StudentHomePage />} />
           <Route path="home" element={<StudentHomePage />} />
           <Route path="courses" element={<StudentViewCoursesPage />} />
+          <Route path="contests" element={<ContestsPage />} />
           <Route
             path="course/details/:id"
             element={<StudentViewCourseDetailsPage />}
