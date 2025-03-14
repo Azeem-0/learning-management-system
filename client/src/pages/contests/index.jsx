@@ -11,11 +11,13 @@ import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Textarea } from "../../components/ui/textarea";
 import axiosInstance from "@/api/axiosInstance";
+import ContestViewer from "@/components/contest-viewer";
 
 function ContestsPage() {
   const { auth } = useContext(AuthContext);
   const [contests, setContests] = useState([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [selectedContest, setSelectedContest] = useState(null);
   const [loading, setLoading] = useState(false);
   const [newContest, setNewContest] = useState({
     title: "",
@@ -137,6 +139,34 @@ function ContestsPage() {
   useEffect(() => {
     fetchContests();
   }, []);
+
+  if (selectedContest) {
+    return (
+      <div className="container mx-auto p-4">
+        <div className="flex justify-between items-center mb-6">
+          <Button
+            onClick={() => setSelectedContest(null)}
+            variant="outline"
+            className="mb-4"
+          >
+            Back to Contests
+          </Button>
+        </div>
+        <ContestViewer
+          contest={{
+            ...selectedContest,
+            selectedProblem: selectedContest.problems[0],
+            onProblemSelect: (problem) => {
+              setSelectedContest((prev) => ({
+                ...prev,
+                selectedProblem: problem,
+              }));
+            },
+          }}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-4">
@@ -378,7 +408,11 @@ function ContestsPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {contests.map((contest) => (
-          <Card key={contest._id} className="hover:shadow-lg transition-shadow">
+          <Card
+            key={contest._id}
+            className="hover:shadow-lg transition-shadow cursor-pointer"
+            onClick={() => setSelectedContest(contest)}
+          >
             <CardHeader>
               <CardTitle>{contest.title}</CardTitle>
             </CardHeader>
