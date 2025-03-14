@@ -36,6 +36,7 @@ function InstructorDashboard({ listOfCourses }) {
   async function fetchTotalStudents() { 
     try {
       const response = await fetchStudentsByCriteria("", "");
+      console.log(response,"response");
       setTotalStudents(response.length);
     } catch (error) {
       console.error("Error fetching total students:", error);
