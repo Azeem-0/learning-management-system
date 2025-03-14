@@ -95,6 +95,7 @@ const CodePlayground = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("output");
   const [executionTime, setExecutionTime] = useState(null);
+  const [input, setInput] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -150,7 +151,7 @@ const CodePlayground = () => {
           language_id: LANGUAGE_IDS[language],
           source_code: code,
           base64_encoded: false,
-          stdin: "",
+          stdin: input,
         }),
       });
 
@@ -433,7 +434,7 @@ const CodePlayground = () => {
             className="h-full flex flex-col"
           >
             <div className="p-3 border-b flex items-center justify-between bg-gray-50 dark:bg-gray-700">
-              <TabsList className="grid w-[200px] grid-cols-1">
+              <TabsList className="grid w-1/2 grid-cols-2">
                 <TabsTrigger value="output" className="flex items-center gap-2">
                   Output
                   {executionTime && (
@@ -441,6 +442,9 @@ const CodePlayground = () => {
                       {executionTime}s
                     </span>
                   )}
+                </TabsTrigger>
+                <TabsTrigger value="input" className="flex items-center gap-2">
+                  Input
                 </TabsTrigger>
               </TabsList>
 
@@ -461,6 +465,16 @@ const CodePlayground = () => {
               )}
             </div>
 
+            <TabsContent value="input" className="flex-1 overflow-auto p-0 m-0">
+              <div className="p-4 h-full">
+                <textarea
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Enter your program input here..."
+                  className="w-full h-full p-2 font-mono text-sm border rounded resize-none focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+            </TabsContent>
             <TabsContent
               value="output"
               className="flex-1 overflow-auto p-0 m-0"
