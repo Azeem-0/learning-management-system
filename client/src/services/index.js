@@ -40,6 +40,12 @@ export async function mediaDeleteService(id) {
   return data;
 }
 
+export async function deleteCourseService(id) {
+  const { data } = await axiosInstance.delete(`/instructor/course/delete/${id}`);
+
+  return data;
+}
+
 export async function fetchInstructorCourseListService() {
   const { data } = await axiosInstance.get(`/instructor/course/get`);
 
@@ -141,3 +147,21 @@ export const addStudentsToCourse = async (courseId, studentEmails) => {
     throw error;
   }
 };
+
+
+export async function fetchStudentsByCriteria(year, branch) {
+  try {
+    const response = await axiosInstance.get(`/api/students`, {
+      params: { year, branch },
+    });
+
+    if (response.data.success) {
+      return response.data.students; // Assuming the API returns { success: true, students: [...] }
+    } else {
+      throw new Error(response.data.message || "Failed to fetch students");
+    }
+  } catch (error) {
+    console.error("Error fetching students:", error);
+    return [];
+  }
+}

@@ -1,4 +1,4 @@
-import { useContext, useState, useMemo } from "react";
+import { useContext, useState, useMemo, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -11,39 +11,43 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Users } from "lucide-react";
-import { addStudentsToCourse } from "@/services";
+import { Users, BookOpen } from "lucide-react";
+import { addStudentsToCourse, fetchStudentsByCriteria } from "@/services";
 import { nContext } from "@/context/notification-context";
+import InstructorStudentSelection from "./student-selection";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 function InstructorDashboard({ listOfCourses }) {
   const { notify } = useContext(nContext);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [studentEmail, setStudentEmail] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("overview");
+  const [totalStudents, setTotalStudents] = useState(0);
 
   // Memoize total students calculation to prevent unnecessary recalculations
-  const { totalStudents } = useMemo(() => {
-    return listOfCourses.reduce(
-      (acc, course) => {
-        const studentCount = course.students?.length || 0;
-        acc.totalStudents += studentCount;
-        return acc;
-      },
-      { totalStudents: 0 }
-    );
-  }, [listOfCourses]);
 
-  function handleAddStudent(course) {
-    setSelectedCourse(course);
-    setIsDialogOpen(true);
+  console.log(listOfCourses,"list of courses");
+
+  useEffect(() => {
+    fetchTotalStudents();
+  }, []);
+  
+  async function fetchTotalStudents() { 
+    try {
+      const response = await fetchStudentsByCriteria("", "");
+      setTotalStudents(response.length);
+    } catch (error) {
+      console.error("Error fetching total students:", error);
+      setTotalStudents(0);
+    }
   }
 
   async function handleStudentSubmit() {
     if (selectedCourse && studentEmail.trim()) {
-      const emails = studentEmail.split(",").map(email => email.trim()); // Split emails and remove spaces
-  
+      const emails = studentEmail.split(",").map(email => email.trim());
       try {
-        await addStudentsToCourse(selectedCourse._id, emails); // Send all emails at once
+        await addStudentsToCourse(selectedCourse._id, emails);
         setStudentEmail(""); 
         setIsDialogOpen(false);
         notify(`Successfully added ${emails.length} students!`);
@@ -53,62 +57,100 @@ function InstructorDashboard({ listOfCourses }) {
     }
   }
 
-  // Store totalStudents in a variable and use it in the config array
-  const config = [
+  // Dashboard stats
+  const stats = [
     {
       icon: Users,
       label: "Total Students",
-      value: totalStudents, // Now using memoized value
+      value: totalStudents,
     },
+    {
+      icon: BookOpen,
+      label: "Total Courses",
+      value: listOfCourses.length,
+    }
   ];
+
+  async function handleViewCourse(course) {
+    window.location.href = `/course/details/${course._id}`;
+  }
 
   return (
     <div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        {config.map((item, index) => (
-          <Card key={index}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{item.label}</CardTitle>
-              <item.icon className="h-4 w-4 text-muted-foreground" />
+      <Tabs defaultValue="overview" onValueChange={setActiveTab}>
+        <TabsList className="mb-6">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="addStudents">Add Students</TabsTrigger>
+          <TabsTrigger value="courses">Courses</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="overview">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            {stats.map((item, index) => (
+              <Card key={index}>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">{item.label}</CardTitle>
+                  <item.icon className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <p className="text-xl font-semibold">{item.value}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="addStudents">
+          <Card>
+            <CardHeader>
+              <CardTitle>Add Students To Courses</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-xl font-semibold">{item.value}</p>
+              <InstructorStudentSelection listOfCourses={listOfCourses} />
             </CardContent>
           </Card>
-        ))}
+        </TabsContent>
+        
+        <TabsContent value="courses">
+          <Card>
+            <CardHeader>
+              <CardTitle>Course Management</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <Table className="w-full">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Course Name</TableHead>
+                      <TableHead>Instructor</TableHead>
+                      <TableHead>Category</TableHead>
+                      <TableHead>Level</TableHead>
+                      <TableHead>Students</TableHead>
+                      <TableHead>Go To Course</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {listOfCourses.map((course, index) => (
+                      <TableRow key={index}>
+                        <TableCell className="font-medium">{course.title.length > 15 ? `${course.title.slice(0, 15)}...` : course.title}</TableCell>
+                        <TableCell>{course.instructorName || "N/A"}</TableCell>
+                        <TableCell>{course.category || "Uncategorized"}</TableCell>
+                        <TableCell>{course.level || "Not specified"}</TableCell>
+                        <TableCell>{course.students?.length || 0}</TableCell>
+                        <TableCell>
+                          <Button size="sm" variant="outline" onClick={() => handleViewCourse(course)}>
+                            Explore
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>  
+        </Table>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Students List</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <Table className="w-full">
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Course Name</TableHead>
-                  <TableHead>Number of Students</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {listOfCourses.map((course, index) => (
-                  <TableRow key={index}>
-                    <TableCell className="font-medium">{course.title}</TableCell>
-                    <TableCell>{course.students?.length || 0}</TableCell> 
-                    <TableCell>
-                      <Button size="sm" onClick={() => handleAddStudent(course)}>
-                        Add Student
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>  
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+    </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>

@@ -21,12 +21,23 @@ export default function AuthProvider({ children }) {
   async function handleRegisterUser(event) {
     event.preventDefault();
     const data = await registerService(signUpFormData);
+    console.log(data, "data");
+
+    if (data.success) {
+      sessionStorage.setItem(
+        "accessToken",
+        JSON.stringify(data.data.accessToken)
+      );
+      notify("Registration successful");
+    } else {
+      notify("Registration failed");
+    }
   }
 
   async function handleLoginUser(event) {
     event.preventDefault();
     const data = await loginService(signInFormData);
-    console.log(data, "datadatadatadatadata");
+    console.log(data, "data");
 
     if (data.success) {
       sessionStorage.setItem(
