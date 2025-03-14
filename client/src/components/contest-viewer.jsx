@@ -1,11 +1,16 @@
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import CodePlayground from "./playground";
+import { useEffect, useState } from "react";
 
 function ContestViewer({ contest }) {
+  useEffect(() => {
+    console.log(contest.problems);
+  }, []);
   if (!contest) {
     return null;
   }
+  const [selectedProbemIndex, setSelectedProblemIndex] = useState(0);
 
   return (
     <div className="space-y-4">
@@ -20,19 +25,22 @@ function ContestViewer({ contest }) {
 
       <div className="grid grid-cols-12 gap-4">
         <div className="col-span-3">
-          <Card>
+          <Card key={selectedProbemIndex}>
             <CardHeader>
               <CardTitle>Problems</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               {contest.problems.map((problem, index) => (
                 <Button
-                  key={index}
+                  key={problem._id}
                   variant={
-                    contest.selectedProblem === problem ? "default" : "outline"
+                    selectedProbemIndex === index ? "default" : "outline"
                   }
                   className="w-full justify-start"
-                  onClick={() => contest.onProblemSelect(problem)}
+                  onClick={() => {
+                    console.log("selected", index);
+                    setSelectedProblemIndex(index);
+                  }}
                 >
                   {problem.title}
                 </Button>
@@ -42,30 +50,32 @@ function ContestViewer({ contest }) {
         </div>
 
         <div className="col-span-9">
-          {contest.selectedProblem ? (
+          {contest.problems[selectedProbemIndex] ? (
             <div className="space-y-4">
               <Card>
                 <CardHeader>
-                  <CardTitle>{contest.selectedProblem.title}</CardTitle>
+                  <CardTitle>
+                    {contest.problems[selectedProbemIndex].title}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
                     <h3 className="font-semibold mb-2">Problem Statement</h3>
                     <p className="whitespace-pre-wrap">
-                      {contest.selectedProblem.problemStatement}
+                      {contest.problems[selectedProbemIndex].problemStatement}
                     </p>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <h3 className="font-semibold mb-2">Input Format</h3>
                       <p className="whitespace-pre-wrap">
-                        {contest.selectedProblem.inputFormat}
+                        {contest.problems[selectedProbemIndex].inputFormat}
                       </p>
                     </div>
                     <div>
                       <h3 className="font-semibold mb-2">Output Format</h3>
                       <p className="whitespace-pre-wrap">
-                        {contest.selectedProblem.outputFormat}
+                        {contest.problems[selectedProbemIndex].outputFormat}
                       </p>
                     </div>
                   </div>
@@ -73,22 +83,24 @@ function ContestViewer({ contest }) {
                     <div>
                       <h3 className="font-semibold mb-2">Sample Input</h3>
                       <pre className="bg-gray-100 p-2 rounded">
-                        {contest.selectedProblem.sampleInput}
+                        {contest.problems[selectedProbemIndex].sampleInput}
                       </pre>
                     </div>
                     <div>
                       <h3 className="font-semibold mb-2">Sample Output</h3>
                       <pre className="bg-gray-100 p-2 rounded">
-                        {contest.selectedProblem.sampleOutput}
+                        {contest.problems[selectedProbemIndex].sampleOutput}
                       </pre>
                     </div>
                   </div>
                   <div className="text-sm text-gray-500">
                     <p>
-                      Time Limit: {contest.selectedProblem.timeLimit} seconds
+                      Time Limit:{" "}
+                      {contest.problems[selectedProbemIndex].timeLimit} seconds
                     </p>
                     <p>
-                      Memory Limit: {contest.selectedProblem.memoryLimit} MB
+                      Memory Limit:{" "}
+                      {contest.problems[selectedProbemIndex].memoryLimit} MB
                     </p>
                   </div>
                 </CardContent>

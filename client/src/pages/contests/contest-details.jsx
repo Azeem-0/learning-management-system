@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/card";
+import { Tabs, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import CodePlayground from "../../components/playground";
 import axiosInstance from "@/api/axiosInstance";
 
@@ -21,6 +22,7 @@ function ContestDetailsPage() {
   const fetchContest = async () => {
     try {
       const response = await axiosInstance.get(`/contests/${id}`);
+      console.log(response);
       if (response.data.success) {
         setContest(response.data.data);
         if (response.data.data.problems.length > 0) {
@@ -35,8 +37,16 @@ function ContestDetailsPage() {
   };
 
   useEffect(() => {
+    console.log("fetching contests");
     fetchContest();
-  }, [id]);
+  }, []);
+
+  // Add a useEffect to log when selectedProblem changes
+  useEffect(() => {
+    if (selectedProblem) {
+      console.log("Selected problem updated:", selectedProblem.title);
+    }
+  }, [selectedProblem]);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -63,17 +73,29 @@ function ContestDetailsPage() {
             <CardHeader>
               <CardTitle>Problems</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
-              {contest.problems.map((problem, index) => (
-                <Button
-                  key={index}
-                  variant={selectedProblem === problem ? "default" : "outline"}
-                  className="w-full justify-start"
-                  onClick={() => setSelectedProblem(problem)}
-                >
-                  {problem.title}
-                </Button>
-              ))}
+            <CardContent>
+              <Tabs
+                defaultValue={contest.problems[0]?._id}
+                onValueChange={(value) => {
+                  const problem = contest.problems.find((p) => p._id === value);
+                  if (problem) {
+                    console.log("Selected problem:", problem);
+                    setSelectedProblem({ ...problem });
+                  }
+                }}
+              >
+                <TabsList className="flex flex-col w-full gap-2">
+                  {contest.problems.map((problem) => (
+                    <TabsTrigger
+                      key={problem._id}
+                      value={problem._id}
+                      className="w-full justify-start"
+                    >
+                      {problem.title}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </Tabs>
             </CardContent>
           </Card>
         </div>
