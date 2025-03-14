@@ -9,11 +9,19 @@ import {
   SelectValue,
 } from "../ui/select";
 
+const JUDGE0_API_URL = "https://judge0-ce.p.rapidapi.com";
+const LANGUAGE_IDS = {
+  javascript: 63,
+  python: 71,
+  java: 62,
+};
+
 const CodePlayground = () => {
   const [language, setLanguage] = useState("javascript");
   const [theme, setTheme] = useState("vs-dark");
   const [code, setCode] = useState("// Start coding here\n");
   const [output, setOutput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleEditorChange = (value) => {
     setCode(value);
@@ -28,20 +36,60 @@ const CodePlayground = () => {
     setTheme(value);
   };
 
-  const handleRunCode = () => {
+  const handleRunCode = async () => {
+    setIsLoading(true);
+    setOutput("");
+
     try {
-      // For JavaScript, we can use eval for demonstration
-      // In a production environment, you should use a secure backend service
-      if (language === "javascript") {
-        const result = eval(code);
-        setOutput(String(result));
+      // Create submission
+      const submissionResponse = await fetch(`${JUDGE0_API_URL}/submissions`, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "Content-Type": "application/json",
+          "X-RapidAPI-Key":
+            "d048904afamsh7c58dce1604a4e9p176967jsna9a437cfb37f",
+          "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
+        },
+        body: JSON.stringify({
+          language_id: LANGUAGE_IDS[language],
+          source_code: code,
+          base64_encoded: false,
+          stdin: "",
+        }),
+      });
+
+      const { token } = await submissionResponse.json();
+
+      // Get submission result
+      const resultResponse = await fetch(
+        `${JUDGE0_API_URL}/submissions/${token}?base64_encoded=false&fields=stdout,stderr,status_id,compile_output`,
+        {
+          method: "GET",
+          headers: {
+            "X-RapidAPI-Key":
+              "d048904afamsh7c58dce1604a4e9p176967jsna9a437cfb37f",
+            "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
+          },
+        }
+      );
+
+      const result = await resultResponse.json();
+
+      // Handle different types of output
+      if (result.compile_output) {
+        setOutput(result.compile_output);
+      } else if (result.stderr) {
+        setOutput(result.stderr);
+      } else if (result.stdout) {
+        setOutput(result.stdout);
       } else {
-        setOutput(
-          "Code execution for other languages requires backend integration."
-        );
+        setOutput("No output");
       }
     } catch (error) {
       setOutput(`Error: ${error.message}`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -69,7 +117,9 @@ const CodePlayground = () => {
           </SelectContent>
         </Select>
 
-        <Button onClick={handleRunCode}>Run Code</Button>
+        <Button onClick={handleRunCode} disabled={isLoading}>
+          {isLoading ? "Running..." : "Run Code"}
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
