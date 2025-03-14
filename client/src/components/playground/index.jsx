@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Editor from "@monaco-editor/react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 import {
   Select,
   SelectContent,
@@ -11,7 +12,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Play, Copy, Code2, FileCode, Download } from "lucide-react";
+import {
+  Loader2,
+  Play,
+  Copy,
+  Code2,
+  FileCode,
+  Download,
+  ChevronLeft,
+} from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -72,6 +81,7 @@ public class Main {
 };
 
 const CodePlayground = () => {
+  const navigate = useNavigate();
   const [language, setLanguage] = useLocalStorage(
     "code-playground-language",
     "javascript"
@@ -251,6 +261,15 @@ const CodePlayground = () => {
         className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
       >
         <div className="flex flex-wrap items-center gap-3">
+          <Button
+            onClick={() => navigate("/")}
+            variant="ghost"
+            size="sm"
+            className="mr-4"
+          >
+            <ChevronLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
