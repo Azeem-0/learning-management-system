@@ -80,3 +80,7 @@
     @apply bg-background text-foreground font-sans;
   }
 }
+
+.max-z-index {
+  z-index: 9999999999 !important;
+}
