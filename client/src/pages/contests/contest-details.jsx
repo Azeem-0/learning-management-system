@@ -146,9 +146,48 @@ function ContestDetailsPage() {
                     <p>Time Limit: {selectedProblem.timeLimit} seconds</p>
                     <p>Memory Limit: {selectedProblem.memoryLimit} MB</p>
                   </div>
+                  {selectedProblem.testCases &&
+                    selectedProblem.testCases.length > 0 && (
+                      <div>
+                        <h3 className="font-semibold mb-2">Test Cases</h3>
+                        <div className="space-y-4">
+                          {selectedProblem.testCases.map((testCase, index) => (
+                            <div
+                              key={index}
+                              className="border rounded p-4 space-y-2"
+                            >
+                              <div className="font-medium">
+                                Test Case {index + 1}
+                              </div>
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <h4 className="text-sm font-semibold mb-1">
+                                    Input
+                                  </h4>
+                                  <pre className="bg-gray-100 p-2 rounded text-sm">
+                                    {testCase.input}
+                                  </pre>
+                                </div>
+                                <div>
+                                  <h4 className="text-sm font-semibold mb-1">
+                                    Expected Output
+                                  </h4>
+                                  <pre className="bg-gray-100 p-2 rounded text-sm">
+                                    {testCase.output}
+                                  </pre>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                 </CardContent>
               </Card>
-              <CodePlayground />
+              <CodePlayground
+                contest={contest}
+                selectedProblem={selectedProblem}
+              />
             </div>
           ) : (
             <div>Select a problem to start coding</div>

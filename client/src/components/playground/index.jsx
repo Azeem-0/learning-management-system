@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Editor from "@monaco-editor/react";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Select,
   SelectContent,
@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import TestResults from "@/components/test-results";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Loader2,
@@ -137,7 +138,32 @@ const CodePlayground = () => {
     const startTime = performance.now();
 
     try {
-      // Create submission
+      const location = useLocation();
+      const isContestProblem = location.pathname.includes("/contests/");
+
+      if (isContestProblem) {
+        // Validate against test cases
+        const response = await fetch("/submissions/validate", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            contestId: contest._id,
+            problemId: selectedProblem._id,
+            code,
+            language: LANGUAGE_IDS[language],
+          }),
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          setOutput(JSON.stringify(data.data, null, 2));
+          return;
+        }
+      }
+
+      // Regular code execution
       const submissionResponse = await fetch(`${JUDGE0_API_URL}/submissions`, {
         method: "POST",
         headers: {
