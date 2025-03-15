@@ -1,7 +1,6 @@
 const Contest = require("../../models/Contest");
 
 const validateSubmission = async (req, res) => {
-  console.log(req.body.body);
   try {
     const { contestId, problemId, code, language } = req.body.body;
     const userId = req.user._id;
@@ -35,65 +34,50 @@ const validateSubmission = async (req, res) => {
     // Initialize results array to store test case outcomes
     const results = [];
     let allTestsPassed = true;
-
+    const JUDGE0_API_URL = "https://judge0-ce.p.rapidapi.com";
     // Run code against each test case
     for (const testCase of problem.testCases) {
-      console.log("Processing test case:", testCase);
       try {
         // Create submission to Judge0 API
         const submissionResponse = await fetch(
-          `${process.env.JUDGE0_API_URL}/submissions`,
+          `${JUDGE0_API_URL}/submissions`,
           {
             method: "POST",
             headers: {
+              "content-type": "application/json",
               "Content-Type": "application/json",
-              "X-RapidAPI-Key": process.env.RAPIDAPI_KEY,
+              "X-RapidAPI-Key":
+                "d048904afamsh7c58dce1604a4e9p176967jsna9a437cfb37f",
               "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
             },
             body: JSON.stringify({
-              source_code: code,
               language_id: language,
+              source_code: code,
+              base64_encoded: false,
               stdin: testCase.input,
-              expected_output: testCase.output,
-              cpu_time_limit: problem.timeLimit,
-              memory_limit: problem.memoryLimit,
             }),
           }
         );
-
         const { token } = await submissionResponse.json();
-
-        // Get submission result
         const resultResponse = await fetch(
-          `${process.env.JUDGE0_API_URL}/submissions/${token}?base64_encoded=false&fields=status_id,stdout,time,memory,stderr,compile_output`,
+          `${JUDGE0_API_URL}/submissions/${token}?base64_encoded=false&fields=stdout,stderr,status_id,compile_output,time`,
           {
             method: "GET",
             headers: {
-              "Content-Type": "application/json",
-              "X-RapidAPI-Key": process.env.RAPIDAPI_KEY,
+              "X-RapidAPI-Key":
+                "d048904afamsh7c58dce1604a4e9p176967jsna9a437cfb37f",
               "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
             },
           }
         );
 
         const result = await resultResponse.json();
-
-        // Compare output with expected output
-        const testCaseResult = {
-          passed:
-            result.status_id === 3 &&
-            (result.stdout || "").trim() === testCase.output.trim(),
-          executionTime: result.time,
-          memory: result.memory,
-          status: result.status_id,
-          error: result.stderr || result.compile_output || "Execution error",
-          output: result.stdout || "",
-        };
-
-        results.push(testCaseResult);
-        if (!testCaseResult.passed) {
-          allTestsPassed = false;
-        }
+        console.log(
+          result.stdout,
+          testCase.output,
+          result.stdout === testCase.output
+        );
+        await new Promise((resolve) => setTimeout(resolve, 2000));
       } catch (error) {
         console.error("Error processing test case:", error);
         results.push({
