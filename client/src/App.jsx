@@ -17,6 +17,8 @@ import PlaygroundPage from "./pages/playground";
 import ContestsPage from "./pages/contests";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
+import StudentQuizDetailsPage from "./pages/quiz";
+import QuizDashboard from "./pages/instructor/quiz-dashboard";
 
 function App() {
   const { auth } = useContext(AuthContext);
@@ -33,7 +35,6 @@ function App() {
         theme="light"
       />
       <Routes>
-        {/* working */}
         <Route
           path="/auth"
           element={
@@ -45,7 +46,6 @@ function App() {
           }
         />
 
-        {/* working */}
         <Route
           path="/instructor"
           element={
@@ -57,10 +57,7 @@ function App() {
           }
         />
 
-        {/* Playground Route */}
-        <Route path="/playground" element={<PlaygroundPage />} />
 
-        {/* working */}
         <Route
           path="/instructor/create-new-course"
           element={
@@ -72,12 +69,23 @@ function App() {
           }
         />
 
-        {/* have to check */}
+        {/* working */}
         <Route
           path="/instructor/edit-course/:courseId"
           element={
             <RouteGuard
               element={<AddNewCoursePage />}
+              authenticated={auth?.authenticate}
+              user={auth?.user}
+            />
+          }
+        />
+
+        <Route
+          path="/instructor/quiz-dashboard"
+          element={
+            <RouteGuard
+              element={<QuizDashboard />}
               authenticated={auth?.authenticate}
               user={auth?.user}
             />
@@ -103,7 +111,11 @@ function App() {
             path="course/details/:id"
             element={<StudentViewCourseDetailsPage />}
           />
-          {/* <Route path="payment-return" element={<PaypalPaymentReturnPage />} /> */}
+
+          <Route path="/playground" element={<PlaygroundPage />} />
+
+          <Route path='/quiz/details/:id' element={<StudentQuizDetailsPage />} />
+          
           <Route path="student-courses" element={<StudentCoursesPage />} />
           <Route
             path="course-progress/:id"
