@@ -1,16 +1,23 @@
-
-
 const express = require("express");
 const router = express.Router();
 const quizController = require("../../controllers/quiz-controller/index");
+const authenticate = require("../../middleware/auth-middleware");
 
-router.post("/", quizController.createQuiz);
-router.get("/", quizController.getQuizzes);
-router.get("/:id", quizController.getQuizById);
-router.put("/:id", quizController.updateQuiz);
-router.delete("/:id", quizController.deleteQuiz);
-router.post("/assign-students", quizController.assignStudentsToQuiz);
-router.post("/submit-attempt", quizController.submitQuizAttempt);
-router.get("/attempts/:userId", quizController.getStudentQuizAttempts);
+// Quiz CRUD operations
+router.post("/", authenticate, quizController.createQuiz);
+router.get("/", authenticate, quizController.getQuizzes);
+router.get("/:id", authenticate, quizController.getQuizById);
+router.put("/:id", authenticate, quizController.updateQuiz);
+router.delete("/:id", authenticate, quizController.deleteQuiz);
+
+// Student quiz endpoints
+router.post("/start-quiz", authenticate, quizController.startQuiz);
+router.post("/submit-attempt", authenticate, quizController.submitQuizAttempt);
+router.get("/attempts/:userId", authenticate, quizController.getStudentQuizAttempts);
+
+// Instructor quiz management
+router.post("/assign-students", authenticate, quizController.assignStudentsToQuiz);
+router.get("/course/:courseId", authenticate, quizController.getQuizzesByCourse);
+router.get("/results/:quizId", authenticate, quizController.getQuizResults);
 
 module.exports = router;
