@@ -2,6 +2,8 @@ const Course = require("../../models/Course");
 const User = require("../../models/User");
 const StudentCourses = require("../../models/StudentCourses");
 const CourseProgress = require("../../models/CourseProgress");
+const Quiz = require("../../models/Quiz");
+const StudentQuizAttempts = require("../../models/StudentQuizAttempts");
 
 const addNewCourse = async (req, res) => {
   try {
@@ -45,7 +47,8 @@ const getAllCourses = async (req, res) => {
 const getCourseDetailsByID = async (req, res) => {
   try {
     const { id } = req.params;
-    const courseDetails = await Course.findById(id);
+    const courseDetails = await Course.findById(id).populate("quizzes");
+    console.log(courseDetails, "courseDetails");
 
     if (!courseDetails) {
       return res.status(404).json({
@@ -206,6 +209,18 @@ const deleteCourse = async (req, res) => {
 
     // Delete course progress data
     await CourseProgress.deleteMany({ courseId: id });
+
+    // Find all quizzes associated with this course
+    const quizzes = await Quiz.find({ courseId: id });
+    const quizIds = quizzes.map(quiz => quiz._id);
+    
+    // Delete all student quiz attempts for these quizzes
+    if (quizIds.length > 0) {
+      await StudentQuizAttempts.deleteMany({ quizId: { $in: quizIds } });
+    }
+
+    // Delete all quizzes associated with the course
+    await Quiz.deleteMany({ courseId: id });
 
     res.status(200).json({
       success: true,

@@ -33,7 +33,7 @@ const getAllStudentViewCourses = async (req, res) => {
         coursesQuery.primaryLanguage = { $in: primaryLanguage.split(",") };
       }
 
-      assignedCourses = await Course.find(coursesQuery);
+      assignedCourses = await Course.find(coursesQuery).populate("quizzes");
     } else {
       // Find student courses
       const studentCourses = await StudentCourses.findOne({ userId });
@@ -51,7 +51,7 @@ const getAllStudentViewCourses = async (req, res) => {
           coursesQuery.primaryLanguage = { $in: primaryLanguage.split(",") };
         }
 
-        assignedCourses = await Course.find(coursesQuery);
+        assignedCourses = await Course.find(coursesQuery).populate("quizzes");
 
         // Merge with enrollment data
         assignedCourses = assignedCourses.map(course => {
@@ -89,7 +89,8 @@ const getAllStudentViewCourses = async (req, res) => {
 const getStudentViewCourseDetails = async (req, res) => {
   try {
     const { id } = req.params;
-    const courseDetails = await Course.findById(id);
+    const courseDetails = await Course.findById(id).populate("quizzes");
+    console.log(courseDetails, "courseDetails");
 
     if (!courseDetails) {
       return res.status(404).json({

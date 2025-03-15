@@ -28,6 +28,14 @@ exports.createQuiz = async (req, res) => {
     });
 
     await newQuiz.save();
+    
+    // Update the course to include this quiz
+    await Course.findByIdAndUpdate(
+      courseId,
+      { $push: { quizzes: newQuiz._id } },
+      { new: true }
+    );
+    
     res.status(201).json({ success: true, message: "Quiz created successfully!", quiz: newQuiz });
   } catch (error) {
     res.status(500).json({ success: false, message: "Error creating quiz", error: error.message });
@@ -199,6 +207,26 @@ exports.updateQuiz = async (req, res) => {
     }
     
     // If no submitted attempts, allow all updates
+    const quiz = await Quiz.findById(req.params.id);
+    if (!quiz) return res.status(404).json({ success: false, message: "Quiz not found" });
+
+    // Check if courseId is being changed
+    if (req.body.courseId && req.body.courseId !== quiz.courseId.toString()) {
+      // Remove quiz from old course
+      await Course.findByIdAndUpdate(
+        quiz.courseId,
+        { $pull: { quizzes: quiz._id } },
+        { new: true }
+      );
+      
+      // Add quiz to new course
+      await Course.findByIdAndUpdate(
+        req.body.courseId,
+        { $push: { quizzes: quiz._id } },
+        { new: true }
+      );
+    }
+    
     const updatedQuiz = await Quiz.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!updatedQuiz) return res.status(404).json({ success: false, message: "Quiz not found" });
 
@@ -229,6 +257,13 @@ exports.deleteQuiz = async (req, res) => {
     // Delete the quiz
     const deletedQuiz = await Quiz.findByIdAndDelete(req.params.id);
     if (!deletedQuiz) return res.status(404).json({ success: false, message: "Quiz not found" });
+
+    // Remove quiz from course's quizzes array
+    await Course.findByIdAndUpdate(
+      deletedQuiz.courseId,
+      { $pull: { quizzes: req.params.id } },
+      { new: true }
+    );
 
     res.status(200).json({ success: true, message: "Quiz deleted successfully" });
   } catch (error) {
@@ -379,42 +414,62 @@ exports.getQuizzesByCourse = async (req, res) => {
     const { courseId } = req.params;
     const userId = req.user._id;
     
-    // Find all quizzes for this course
-    const quizzes = await Quiz.find({ 
-      courseId,
-      status: true,
-      startDate: { $lte: new Date() },
-      $or: [
-        { endDate: null },
-        { endDate: { $gte: new Date() } }
-      ]
-    }).select('title description duration startDate endDate');
-    
-    // Get student's attempts for these quizzes
-    const quizIds = quizzes.map(quiz => quiz._id);
-    const attempts = await StudentQuizAttempts.find({
-      userId,
-      quizId: { $in: quizIds }
-    }).select('quizId isSubmitted score percentageScore passed');
-    
-    // Combine the data
-    const quizzesWithAttempts = quizzes.map(quiz => {
-      const attempt = attempts.find(a => a.quizId.toString() === quiz._id.toString());
-      return {
-        _id: quiz._id,
-        title: quiz.title,
-        description: quiz.description,
-        duration: quiz.duration,
-        startDate: quiz.startDate,
-        endDate: quiz.endDate,
-        attempted: !!attempt,
-        completed: attempt?.isSubmitted || false,
-        score: attempt?.percentageScore || 0,
-        passed: attempt?.passed || false
-      };
+    // First check if this is an instructor request
+    const course = await Course.findOne({ 
+      _id: courseId,
+      instructorId: userId
     });
     
-    res.status(200).json({ success: true, quizzes: quizzesWithAttempts });
+    let quizzes;
+    
+    if (course) {
+      // This is an instructor, show all quizzes
+      quizzes = await Quiz.find({ 
+        courseId
+      }).populate({
+        path: 'questions',
+        select: 'questionText'
+      });
+      
+      res.status(200).json({ success: true, quizzes });
+    } else {
+      // This is a student, show only active quizzes
+      quizzes = await Quiz.find({ 
+        courseId,
+        status: true,
+        startDate: { $lte: new Date() },
+        $or: [
+          { endDate: null },
+          { endDate: { $gte: new Date() } }
+        ]
+      }).select('title description duration startDate endDate');
+      
+      // Get student's attempts for these quizzes
+      const quizIds = quizzes.map(quiz => quiz._id);
+      const attempts = await StudentQuizAttempts.find({
+        userId,
+        quizId: { $in: quizIds }
+      }).select('quizId isSubmitted score percentageScore passed');
+      
+      // Combine the data
+      const quizzesWithAttempts = quizzes.map(quiz => {
+        const attempt = attempts.find(a => a.quizId.toString() === quiz._id.toString());
+        return {
+          _id: quiz._id,
+          title: quiz.title,
+          description: quiz.description,
+          duration: quiz.duration,
+          startDate: quiz.startDate,
+          endDate: quiz.endDate,
+          attempted: !!attempt,
+          completed: attempt?.isSubmitted || false,
+          score: attempt?.percentageScore || 0,
+          passed: attempt?.passed || false
+        };
+      });
+      
+      res.status(200).json({ success: true, quizzes: quizzesWithAttempts });
+    }
   } catch (error) {
     res.status(500).json({ success: false, message: "Error fetching quizzes for course", error: error.message });
   }
