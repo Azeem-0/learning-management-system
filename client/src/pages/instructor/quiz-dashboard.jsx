@@ -84,12 +84,8 @@ const QuizDashboard = () => {
   const fetchQuizzes = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`/api/quiz`, {
-        params: {
-          courseId: selectedCourse,
-          instructorId: instructorProfile._id
-        }
-      });
+      // Update to use the correct API endpoint for fetching quizzes by course
+      const response = await axios.get(`/api/quiz/course/${selectedCourse}`);
       
       if (response.data.success) {
         setQuizzes(response.data.quizzes);
@@ -98,7 +94,8 @@ const QuizDashboard = () => {
         const quizzesWithResults = {};
         await Promise.all(response.data.quizzes.map(async (quiz) => {
           try {
-            const resultsResponse = await axios.get(`/api/quiz/${quiz._id}/results`);
+            // Update to use the correct API endpoint for fetching quiz results
+            const resultsResponse = await axios.get(`/api/quiz/results/${quiz._id}`);
             if (resultsResponse.data.success) {
               quizzesWithResults[quiz._id] = resultsResponse.data.results;
             }

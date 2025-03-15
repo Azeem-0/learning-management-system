@@ -5,9 +5,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import VideoPlayer from "@/components/video-player";
 import { StudentContext } from "@/context/student-context";
 import { fetchStudentViewCourseDetailsService } from "@/services";
-import { CheckCircle, Globe, Users } from "lucide-react";
+import { CheckCircle, Globe, Users, FileText } from "lucide-react";
 import { useContext, useEffect } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 function StudentViewCourseDetailsPage() {
   const {
@@ -19,8 +19,11 @@ function StudentViewCourseDetailsPage() {
     setLoadingState,
   } = useContext(StudentContext);
 
+  console.log(studentViewCourseDetails,"studentViewCourseDetails");
+
   const { id } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
   const [selectedVideo, setSelectedVideo] = useState(null);
 
   async function fetchStudentViewCourseDetails() {
@@ -117,7 +120,14 @@ function StudentViewCourseDetailsPage() {
         <aside className="md:col-span-1">
           <Card className="sticky top-4">
             <CardContent className="p-6">
-              <img src={studentViewCourseDetails?.image} alt="Course Thumbnail" className="w-full rounded-lg shadow-md" />
+              <img src={studentViewCourseDetails?.image} alt="Course Thumbnail" className="w-full rounded-lg shadow-md mb-4" />
+              <Button 
+                className="w-full mt-4 flex items-center justify-center" 
+                onClick={() => navigate(`/quiz/details/${studentViewCourseDetails?.quizzes[0]?._id}`)}
+              >
+                <FileText className="mr-2 h-5 w-5" />
+                Take Course Quiz
+              </Button>
             </CardContent>
           </Card>
         </aside>

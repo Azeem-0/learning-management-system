@@ -125,8 +125,8 @@ function StudentQuizDetailsPage() {
         notify(response?.message || "Failed to start quiz");
       }
     } catch (error) {
-      console.error("Error starting quiz:", error);
-      notify("Error starting quiz. Please try again.");
+      console.error("Error starting quiz:", error?.response?.data?.message);
+      notify(error?.response?.data?.message || "Error starting quiz. Please try again.");
     } finally {
       setLoadingState(false);
     }
@@ -165,8 +165,8 @@ function StudentQuizDetailsPage() {
         notify(response?.message || "Failed to submit quiz");
       }
     } catch (error) {
-      console.error("Error submitting quiz:", error);
-      notify("Error submitting quiz. Please try again.");
+      console.error("Error submitting quiz:", error?.response?.data?.message);
+      notify(error?.response?.data?.message || "Error submitting quiz. Please try again.");
     } finally {
       setSubmitting(false);
       // Clear the timer
