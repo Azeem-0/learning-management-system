@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Editor from "@monaco-editor/react";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Select,
   SelectContent,
@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import TestResults from "@/components/test-results";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Loader2,
@@ -31,6 +32,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import axiosInstance from "@/api/axiosInstance";
 
 const JUDGE0_API_URL = "https://judge0-ce.p.rapidapi.com";
 const LANGUAGE_IDS = {
@@ -80,8 +82,59 @@ public class Main {
 }`,
 };
 
-const CodePlayground = () => {
+const CodePlayground = ({ contest, selectedProblem }) => {
+  const handleSubmitCode = async () => {
+    if (!code.trim()) {
+      toast({
+        title: "Empty Code",
+        description: "Please write some code before submitting.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    setOutput("");
+    setActiveTab("output");
+
+    try {
+      const response = await axiosInstance.post("/submissions/submit", {
+        body: {
+          contestId: contest._id,
+          problemId: selectedProblem._id,
+          code,
+          language: LANGUAGE_IDS[language],
+        },
+      });
+
+      console.log(response.data);
+      if (data.success) {
+        setOutput(JSON.stringify(data.data, null, 2));
+        toast({
+          title: "Solution submitted",
+          description: "Your solution has been submitted successfully.",
+        });
+      } else {
+        toast({
+          title: "Submission Error",
+          description: data.message || "Failed to submit solution",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      setOutput(`Error: ${error.message}`);
+      toast({
+        title: "Submission Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const navigate = useNavigate();
+  const location = useLocation();
   const [language, setLanguage] = useLocalStorage(
     "code-playground-language",
     "javascript"
@@ -137,7 +190,31 @@ const CodePlayground = () => {
     const startTime = performance.now();
 
     try {
-      // Create submission
+      const isContestProblem = location.pathname.includes("/contests/");
+
+      if (isContestProblem) {
+        // Validate against test cases
+        const response = await fetch("/submissions/validate", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            contestId: contest._id,
+            problemId: selectedProblem._id,
+            code,
+            language: LANGUAGE_IDS[language],
+          }),
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          setOutput(JSON.stringify(data.data, null, 2));
+          return;
+        }
+      }
+
+      // Regular code execution
       const submissionResponse = await fetch(`${JUDGE0_API_URL}/submissions`, {
         method: "POST",
         headers: {
@@ -254,7 +331,7 @@ const CodePlayground = () => {
   };
 
   return (
-    <div className="container mx-auto p-4 min-h-screen bg-gray-100 dark:bg-gray-900">
+    <div className="w-full container mx-auto p-4 min-h-screen bg-gray-100 dark:bg-gray-900">
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -370,6 +447,33 @@ const CodePlayground = () => {
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
+
+          {contest && selectedProblem && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    className="ml-2 gap-2 px-4"
+                    onClick={handleSubmitCode}
+                    disabled={isLoading}
+                    variant="secondary"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Submitting...
+                      </>
+                    ) : (
+                      <>Submit Solution</>
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Submit your solution</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
         </div>
       </motion.div>
 
@@ -433,8 +537,8 @@ const CodePlayground = () => {
             onValueChange={setActiveTab}
             className="h-full flex flex-col"
           >
-            <div className="p-3 border-b flex items-center justify-between bg-gray-50 dark:bg-gray-700">
-              <TabsList className="grid w-1/2 grid-cols-2">
+            <div className="w-full p-2 border-b flex items-center justify-between bg-gray-50 dark:bg-gray-700">
+              <TabsList className="grid w-3/4 grid-cols-2">
                 <TabsTrigger value="output" className="flex items-center gap-2">
                   Output
                   {executionTime && (
@@ -486,14 +590,23 @@ const CodePlayground = () => {
                     <span className="ml-3">Executing code...</span>
                   </div>
                 ) : output ? (
-                  <pre
-                    className={cn(
-                      "whitespace-pre-wrap font-mono text-sm p-2 rounded",
-                      output.includes("Error") ? "text-red-500" : ""
-                    )}
-                  >
-                    {output}
-                  </pre>
+                  <div className="h-full flex flex-col">
+                    <div className="mb-2 flex items-center gap-2">
+                      {executionTime && (
+                        <span className="text-xs bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded-full">
+                          Execution time: {executionTime}s
+                        </span>
+                      )}
+                    </div>
+                    <pre
+                      className={cn(
+                        "flex-1 whitespace-pre-wrap font-mono text-sm p-4 rounded bg-gray-50 dark:bg-gray-900 overflow-auto",
+                        output.includes("Error") ? "text-red-500" : ""
+                      )}
+                    >
+                      {output}
+                    </pre>
+                  </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center h-full text-gray-400">
                     <Play className="h-12 w-12 mb-4 opacity-20" />

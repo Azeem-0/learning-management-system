@@ -1,5 +1,16 @@
 const mongoose = require("mongoose");
 
+const testCaseSchema = new mongoose.Schema({
+  input: {
+    type: String,
+    required: true,
+  },
+  output: {
+    type: String,
+    required: true,
+  },
+});
+
 const problemSchema = new mongoose.Schema({
   title: {
     type: String,
@@ -29,6 +40,14 @@ const problemSchema = new mongoose.Schema({
   sampleOutput: {
     type: String,
     required: true,
+  },
+  testCases: {
+    type: [testCaseSchema],
+    required: true,
+    validate: [
+      (array) => array.length > 0,
+      "At least one test case is required",
+    ],
   },
   timeLimit: {
     type: Number,

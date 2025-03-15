@@ -33,6 +33,7 @@ function ContestsPage() {
         sampleOutput: "",
         timeLimit: 1,
         memoryLimit: 256,
+        testCases: [{ input: "", output: "" }],
       },
     ],
     startTime: "",
@@ -389,6 +390,129 @@ function ContestsPage() {
                           required
                         />
                       </div>
+                    </div>
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <Label>Test Cases</Label>
+                        <Button
+                          onClick={() => {
+                            setNewContest((prev) => ({
+                              ...prev,
+                              problems: prev.problems.map((p, i) =>
+                                i === index
+                                  ? {
+                                      ...p,
+                                      testCases: [
+                                        ...p.testCases,
+                                        { input: "", output: "" },
+                                      ],
+                                    }
+                                  : p
+                              ),
+                            }));
+                          }}
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                        >
+                          Add Test Case
+                        </Button>
+                      </div>
+                      {problem.testCases.map((testCase, testIndex) => (
+                        <div
+                          key={testIndex}
+                          className="space-y-4 border p-4 rounded-lg"
+                        >
+                          <div className="flex justify-between items-center">
+                            <h4 className="font-medium">
+                              Test Case {testIndex + 1}
+                            </h4>
+                            {problem.testCases.length > 1 && (
+                              <Button
+                                onClick={() => {
+                                  setNewContest((prev) => ({
+                                    ...prev,
+                                    problems: prev.problems.map((p, i) =>
+                                      i === index
+                                        ? {
+                                            ...p,
+                                            testCases: p.testCases.filter(
+                                              (_, ti) => ti !== testIndex
+                                            ),
+                                          }
+                                        : p
+                                    ),
+                                  }));
+                                }}
+                                variant="destructive"
+                                size="sm"
+                              >
+                                Remove
+                              </Button>
+                            )}
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label>Input</Label>
+                              <Textarea
+                                value={testCase.input}
+                                onChange={(e) => {
+                                  setNewContest((prev) => ({
+                                    ...prev,
+                                    problems: prev.problems.map((p, i) =>
+                                      i === index
+                                        ? {
+                                            ...p,
+                                            testCases: p.testCases.map(
+                                              (tc, ti) =>
+                                                ti === testIndex
+                                                  ? {
+                                                      ...tc,
+                                                      input: e.target.value,
+                                                    }
+                                                  : tc
+                                            ),
+                                          }
+                                        : p
+                                    ),
+                                  }));
+                                }}
+                                placeholder="Enter test case input"
+                                required
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label>Output</Label>
+                              <Textarea
+                                value={testCase.output}
+                                onChange={(e) => {
+                                  setNewContest((prev) => ({
+                                    ...prev,
+                                    problems: prev.problems.map((p, i) =>
+                                      i === index
+                                        ? {
+                                            ...p,
+                                            testCases: p.testCases.map(
+                                              (tc, ti) =>
+                                                ti === testIndex
+                                                  ? {
+                                                      ...tc,
+                                                      output: e.target.value,
+                                                    }
+                                                  : tc
+                                            ),
+                                          }
+                                        : p
+                                    ),
+                                  }));
+                                }}
+                                placeholder="Enter expected output"
+                                required
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </CardContent>
                 </Card>

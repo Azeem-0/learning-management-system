@@ -10,6 +10,7 @@ const studentCourseProgressRoutes = require("./routes/student-routes/course-prog
 const studentSelectionRoutes = require("./routes/instructor-routes/student-selection-route");
 const quizRoutes = require("./routes/quiz-routes");
 const contestsRoutes = require("./routes/contest-routes/index");
+const submissionRoutes = require("./routes/contest-routes/submission-routes");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -39,6 +40,7 @@ app.use("/student/course", studentViewCourseRoutes);
 app.use("/student/course-progress", studentCourseProgressRoutes);
 app.use("/api", studentSelectionRoutes);
 app.use("/contests", contestsRoutes);
+app.use("/submissions", submissionRoutes);
 app.use("/quiz", quizRoutes);
 
 app.use((err, req, res, next) => {

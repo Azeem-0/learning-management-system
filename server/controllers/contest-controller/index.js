@@ -20,7 +20,7 @@ const createContest = async (req, res) => {
       });
     }
 
-    // Validate each problem
+    // Validate each problem and its testcases
     for (const problem of problems) {
       if (
         !problem.title ||
@@ -29,12 +29,26 @@ const createContest = async (req, res) => {
         !problem.inputFormat ||
         !problem.outputFormat ||
         !problem.sampleInput ||
-        !problem.sampleOutput
+        !problem.sampleOutput ||
+        !problem.testCases ||
+        !Array.isArray(problem.testCases) ||
+        problem.testCases.length === 0
       ) {
         return res.status(400).json({
           success: false,
-          message: "All problem fields must be provided for each problem",
+          message:
+            "All problem fields and at least one test case must be provided for each problem",
         });
+      }
+
+      // Validate each test case
+      for (const testCase of problem.testCases) {
+        if (!testCase.input || !testCase.output) {
+          return res.status(400).json({
+            success: false,
+            message: "Each test case must have both input and output",
+          });
+        }
       }
     }
 
