@@ -18,6 +18,7 @@ import ContestsPage from "./pages/contests";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
 import StudentQuizDetailsPage from "./pages/quiz";
+import QuizDashboard from "./pages/instructor/quiz-dashboard";
 
 function App() {
   const { auth } = useContext(AuthContext);
@@ -68,12 +69,23 @@ function App() {
           }
         />
 
-        {/* have to check */}
+        {/* working */}
         <Route
           path="/instructor/edit-course/:courseId"
           element={
             <RouteGuard
               element={<AddNewCoursePage />}
+              authenticated={auth?.authenticate}
+              user={auth?.user}
+            />
+          }
+        />
+
+        <Route
+          path="/instructor/quiz-dashboard"
+          element={
+            <RouteGuard
+              element={<QuizDashboard />}
               authenticated={auth?.authenticate}
               user={auth?.user}
             />
