@@ -19,6 +19,7 @@ export default function QuizCreator({ listOfCourses }) {
   const [newQuiz, setNewQuiz] = useState({
     title: "",
     description: "",
+    duration: 30,
     questions: [{ questionText: "", options: ["", "", "", ""], correctOption: "" }],
   });
   const [loading, setLoading] = useState(false);
@@ -35,7 +36,7 @@ export default function QuizCreator({ listOfCourses }) {
     
     setLoadingQuizzes(true);
     try {
-      const response = await fetchInstructorQuizzesService("",auth?.user?._id,true);
+      const response = await fetchInstructorQuizzesService("",auth?.user?._id,"",true);
       setQuizzes(response || []);
     } catch (error) {
       console.error("Error fetching quizzes:", error);
@@ -94,6 +95,7 @@ export default function QuizCreator({ listOfCourses }) {
     const quizData = {
       title: newQuiz.title,
       description: newQuiz.description,
+      duration: parseInt(newQuiz.duration, 10),
       courseId: selectedCourse,
       questions: newQuiz.questions.map(q => ({
         questionText: q.questionText,
@@ -108,7 +110,7 @@ export default function QuizCreator({ listOfCourses }) {
       const response = await createQuizService(quizData);
       console.log("Quiz Created Successfully!", response);
       setShowCreateForm(false);
-      setNewQuiz({ title: "", description: "", questions: [{ questionText: "", options: ["", "", "", ""], correctOption: "" }] });
+      setNewQuiz({ title: "", description: "", duration: 30, questions: [{ questionText: "", options: ["", "", "", ""], correctOption: "" }] });
       notify("Quiz created successfully!");
       fetchInstructorQuizzes(); // Refresh quiz list
     } catch (error) {
@@ -120,7 +122,7 @@ export default function QuizCreator({ listOfCourses }) {
   };
 
   const handleViewQuiz = (quiz) => {
-    window.location.href = `/quiz/${quiz._id}`;
+    window.location.href = `/quiz/details/${quiz._id}`;
   };
 
   return (
@@ -145,6 +147,10 @@ export default function QuizCreator({ listOfCourses }) {
             <div className="space-y-2">
               <Label>Quiz Description</Label>
               <Textarea name="description" value={newQuiz.description} onChange={handleInputChange} placeholder="Enter quiz description" required />
+            </div>
+            <div className="space-y-2">
+              <Label>Duration (minutes)</Label>
+              <Input name="duration" type="number" min="5" value={newQuiz.duration} onChange={handleInputChange} placeholder="Enter quiz duration in minutes" required />
             </div>
 
             <div className="space-y-2">

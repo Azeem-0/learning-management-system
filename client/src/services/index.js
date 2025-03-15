@@ -197,12 +197,27 @@ export async function assignStudentsToQuizService(payload) {
   return data;
 }
 
-export async function submitQuizAttemptService(quizAttemptData) {
-  const { data } = await axiosInstance.post("/quiz/submit-attempt", quizAttemptData);
+export async function fetchStudentQuizAttemptsService(userId) {
+  const { data } = await axiosInstance.get(`/quiz/attempts/${userId}`);
   return data;
 }
 
-export async function fetchStudentQuizAttemptsService(userId) {
-  const { data } = await axiosInstance.get(`/quiz/attempts/${userId}`);
+export async function startQuizService(quizId) {
+  const { data } = await axiosInstance.post(`/quiz/start-quiz`, { quizId });
+  return data;
+}
+
+export async function submitQuizAttemptService(attemptData) {
+  const { data } = await axiosInstance.post(`/quiz/submit-attempt`, attemptData);
+  return data;
+}
+
+export async function getQuizzesByCourseService(courseId) {
+  const { data } = await axiosInstance.get(`/quiz/course/${courseId}`);
+  return data;
+}
+
+export async function getQuizResultsService(quizId) {
+  const { data } = await axiosInstance.get(`/quiz/results/${quizId}`);
   return data;
 }
