@@ -5,6 +5,6 @@ const {
 const authenticate = require("../../middleware/auth-middleware");
 const router = express.Router();
 
-router.post("/validate", authenticate, validateSubmission);
+router.post("/submit", authenticate, validateSubmission);
 
 module.exports = router;

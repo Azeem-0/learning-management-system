@@ -1,8 +1,9 @@
 const Contest = require("../../models/Contest");
 
 const validateSubmission = async (req, res) => {
+  console.log(req.body.body);
   try {
-    const { contestId, problemId, code, language } = req.body;
+    const { contestId, problemId, code, language } = req.body.body;
     const userId = req.user._id;
 
     // Find the contest and problem
@@ -37,6 +38,7 @@ const validateSubmission = async (req, res) => {
 
     // Run code against each test case
     for (const testCase of problem.testCases) {
+      console.log("Processing test case:", testCase);
       try {
         // Create submission to Judge0 API
         const submissionResponse = await fetch(
@@ -45,6 +47,8 @@ const validateSubmission = async (req, res) => {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
+              "X-RapidAPI-Key": process.env.RAPIDAPI_KEY,
+              "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
             },
             body: JSON.stringify({
               source_code: code,
@@ -66,6 +70,8 @@ const validateSubmission = async (req, res) => {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
+              "X-RapidAPI-Key": process.env.RAPIDAPI_KEY,
+              "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
             },
           }
         );
@@ -74,11 +80,14 @@ const validateSubmission = async (req, res) => {
 
         // Compare output with expected output
         const testCaseResult = {
-          passed: result.stdout.trim() === testCase.output.trim(),
+          passed:
+            result.status_id === 3 &&
+            (result.stdout || "").trim() === testCase.output.trim(),
           executionTime: result.time,
           memory: result.memory,
           status: result.status_id,
-          error: result.stderr || result.compile_output,
+          error: result.stderr || result.compile_output || "Execution error",
+          output: result.stdout || "",
         };
 
         results.push(testCaseResult);
