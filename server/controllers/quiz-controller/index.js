@@ -1,3 +1,4 @@
+const { default: mongoose } = require("mongoose");
 const Course = require("../../models/Course");
 const Quiz = require("../../models/Quiz");
 const StudentQuizAttempts = require("../../models/StudentQuizAttempts");
@@ -475,47 +476,59 @@ exports.getQuizzesByCourse = async (req, res) => {
   }
 };
 
+
 exports.getQuizResults = async (req, res) => {
   try {
     const { quizId } = req.params;
-    
-    // Check if request is from instructor
+    const instructorId = req.query.instructorId;
+
+    if (!mongoose.Types.ObjectId.isValid(quizId)) {
+      return res.status(400).json({ success: false, message: "Invalid quiz ID" });
+    }
+
     const quiz = await Quiz.findById(quizId);
-    if (!quiz) return res.status(404).json({ success: false, message: "Quiz not found" });
-    
-    if (req.user._id.toString() !== quiz.instructorId.toString() && req.user.role !== 'admin') {
+    if (!quiz) {
+      console.error("Quiz not found for ID:", quizId);
+      return res.status(404).json({ success: false, message: "Quiz not found" });
+    }
+
+    if (instructorId && quiz.instructorId && instructorId !== quiz.instructorId.toString()) {
       return res.status(403).json({ success: false, message: "Unauthorized to access these results" });
     }
-    
-    // Get all attempts for this quiz
+
     const attempts = await StudentQuizAttempts.find({ quizId, isSubmitted: true })
       .populate('userId', 'userName userEmail')
       .select('userId score percentageScore passed timeSpent startedAt completedAt');
-    
-    // Get enrolled students who haven't attempted the quiz
+
     const enrolledStudents = await Course.findById(quiz.courseId)
       .select('students')
       .populate('students.studentId', 'userName userEmail');
-    
+
     if (!enrolledStudents) {
       return res.status(404).json({ success: false, message: "Course not found" });
     }
-    
+
+    console.log(enrolledStudents,"enrolledStudents");
+
     const studentsWithNoAttempt = enrolledStudents.students
-      .filter(s => !attempts.some(a => a.userId._id.toString() === s.studentId._id.toString()))
+      .filter(s => !attempts.some(a => a.userId._id.toString() === s.studentId.toString()))
       .map(s => ({
         student: s.studentId,
+        userName : s.studentName,
+        userEmail : s.studentEmail,
         attempted: false
       }));
-    
+
     const results = {
       quizStats: {
         totalStudents: enrolledStudents.students.length,
         totalAttempted: attempts.length,
-        averageScore: attempts.length > 0 ? 
-          Math.round(attempts.reduce((sum, att) => sum + att.percentageScore, 0) / attempts.length) : 0,
-        passRate: attempts.length > 0 ? 
-          Math.round((attempts.filter(a => a.passed).length / attempts.length) * 100) : 0,
+        averageScore: attempts.length > 0
+          ? Math.round(attempts.reduce((sum, att) => sum + att.percentageScore, 0) / attempts.length)
+          : 0,
+        passRate: attempts.length > 0
+          ? Math.round((attempts.filter(a => a.passed).length / attempts.length) * 100)
+          : 0,
       },
       studentResults: attempts.map(a => ({
         student: a.userId,
@@ -529,13 +542,14 @@ exports.getQuizResults = async (req, res) => {
       })),
       notAttempted: studentsWithNoAttempt
     };
-    
+
     res.status(200).json({ success: true, results });
   } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      message: "Error fetching quiz results", 
-      error: error.message 
+    console.error("Error fetching quiz results:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching quiz results",
+      error: error.message
     });
   }
 };
