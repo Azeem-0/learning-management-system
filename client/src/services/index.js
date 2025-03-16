@@ -217,7 +217,7 @@ export async function getQuizzesByCourseService(courseId) {
   return data;
 }
 
-export async function getQuizResultsService(quizId) {
-  const { data } = await axiosInstance.get(`/quiz/results/${quizId}`);
-  return data;
+export async function getQuizResultsService(quizId,instructorId) {
+  const { data } = await axiosInstance.get(`/quiz/results/${quizId}?instructorId=${instructorId}`);
+  return data.results;
 }

@@ -24,11 +24,14 @@ import {
 } from "lucide-react";
 import axios from "axios";
 import { format } from "date-fns";
+import { AuthContext } from "@/context/auth-context";
+import { fetchInstructorQuizzesService, getQuizResultsService } from "@/services";
 
-const QuizDashboard = () => {
+const QuizDashboard = ({ listOfCourses }) => {
   const navigate = useNavigate();
-  const { instructorProfile } = useContext(InstructorContext);
   const { notify } = useContext(nContext);
+
+  const {auth} = useContext(AuthContext);
 
   const [courses, setCourses] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState("");
@@ -37,6 +40,7 @@ const QuizDashboard = () => {
   const [selectedQuiz, setSelectedQuiz] = useState(null);
   const [showResultsDialog, setShowResultsDialog] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [fetchingResults, setFetchingResults] = useState(false);
   const [summaryStats, setSummaryStats] = useState({
     totalQuizzes: 0,
     activeQuizzes: 0,
@@ -46,15 +50,15 @@ const QuizDashboard = () => {
 
   // Fetch instructor's courses on component mount
   useEffect(() => {
-    fetchInstructorCourses();
+    setCourses(listOfCourses);
   }, []);
 
   // Fetch quizzes when a course is selected
   useEffect(() => {
-    if (selectedCourse && instructorProfile?._id) {
+    if (selectedCourse && auth?.user?.role === "instructor") {
       fetchQuizzes();
     }
-  }, [selectedCourse, instructorProfile]);
+  }, [selectedCourse, auth?.user?.role]);
 
   // Calculate summary statistics when quizzes change
   useEffect(() => {
@@ -63,57 +67,45 @@ const QuizDashboard = () => {
     }
   }, [quizzes, quizResults]);
 
-  const fetchInstructorCourses = async () => {
+  const fetchQuizzes = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const response = await axios.get('/api/instructor/courses');
-      if (response.data.success) {
-        setCourses(response.data.courses);
-        if (response.data.courses.length > 0) {
-          setSelectedCourse(response.data.courses[0]._id);
-        }
+      console.log(selectedCourse, "selected course");
+      const response = await fetchInstructorQuizzesService(selectedCourse, auth?.user?._id, true);
+      console.log(response, "response");
+      setQuizzes(response || []);
+      
+      // Fetch results for each quiz
+      if (response && response.length > 0) {
+        fetchQuizResultsForAll(response);
       }
     } catch (error) {
-      console.error("Error fetching instructor courses:", error);
-      notify("Failed to fetch courses");
+      console.error("Error fetching quizzes:", error);
+      notify(error?.response?.data?.message || "Failed to fetch quizzes");
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchQuizzes = async () => {
+  const fetchQuizResultsForAll = async (quizList) => {
+    setFetchingResults(true);
     try {
-      setLoading(true);
-      // Update to use the correct API endpoint for fetching quizzes by course
-      const response = await axios.get(`/api/quiz/course/${selectedCourse}`);
-      
-      if (response.data.success) {
-        setQuizzes(response.data.quizzes);
-        
-        // Fetch results for all quizzes
-        const quizzesWithResults = {};
-        await Promise.all(response.data.quizzes.map(async (quiz) => {
-          try {
-            // Update to use the correct API endpoint for fetching quiz results
-            const resultsResponse = await axios.get(`/api/quiz/results/${quiz._id}`);
-            if (resultsResponse.data.success) {
-              quizzesWithResults[quiz._id] = resultsResponse.data.results;
-            }
-          } catch (error) {
-            console.error(`Error fetching results for quiz ${quiz._id}:`, error);
-          }
-        }));
-        
-        setQuizResults(quizzesWithResults);
-      } else {
-        setQuizzes([]);
-        notify("No quizzes found for this course");
+      const results = {};
+      for (const quiz of quizList) {
+        try {
+          const quizResult = await getQuizResultsService(quiz._id, auth?.user?._id);
+          results[quiz._id] = quizResult;
+        } catch (error) {
+          console.error(`Error fetching results for quiz ${quiz._id}:`, error);
+        }
       }
+      console.log(results, "results");
+      setQuizResults(results);
     } catch (error) {
-      console.error("Error fetching quizzes:", error);
-      notify("Failed to fetch quizzes");
+      console.error("Error fetching quiz results:", error);
+      notify("Failed to fetch some quiz results");
     } finally {
-      setLoading(false);
+      setFetchingResults(false);
     }
   };
 
@@ -190,8 +182,8 @@ const QuizDashboard = () => {
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Quiz Dashboard</h1>
-        <Button onClick={() => navigate("/instructor/quiz-management")}>
-          Manage Quizzes
+        <Button onClick={() => navigate("/courses")}>
+          Explore Courses
         </Button>
       </div>
 
@@ -256,7 +248,7 @@ const QuizDashboard = () => {
               <SelectContent>
                 {courses.map((course) => (
                   <SelectItem key={course._id} value={course._id}>
-                    {course.title}
+                    {course.title.length > 20 ? `${course.title.slice(0, 20)}...` : course.title}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -268,7 +260,11 @@ const QuizDashboard = () => {
             <div className="flex justify-center my-4">
               <p>Loading quiz data...</p>
             </div>
-          ) : quizzes.length === 0 ? (
+          ) : fetchingResults ? (
+            <div className="flex justify-center my-4">
+              <p>Fetching quiz results...</p>
+            </div>
+          ) : (quizzes.length === 0 && selectedCourse) ? (
             <div className="flex flex-col items-center justify-center h-40">
               <p className="text-muted-foreground mb-4">No quizzes found for this course</p>
               <Button 
@@ -277,6 +273,10 @@ const QuizDashboard = () => {
               >
                 Create Your First Quiz
               </Button>
+            </div>
+          ) : !selectedCourse ? (
+            <div className="flex flex-col items-center justify-center h-40">
+              <p className="text-muted-foreground mb-4">Please select a course</p>
             </div>
           ) : (
             <div className="space-y-6">
@@ -453,7 +453,7 @@ const QuizDashboard = () => {
                                 </Badge>
                               ) : (
                                 <Badge variant="destructive" className="flex items-center gap-1">
-                                  <XCircle className="h-3 w-3" />
+                                  <XCircle className="h-3 w-2" />
                                   Failed
                                 </Badge>
                               )}
@@ -484,11 +484,11 @@ const QuizDashboard = () => {
                     <TableBody>
                       {quizResults[selectedQuiz._id].notAttempted.length > 0 ? (
                         quizResults[selectedQuiz._id].notAttempted.map((student) => (
-                          <TableRow key={student.student._id}>
+                          <TableRow key={student._id}>
                             <TableCell className="font-medium">
-                              {student.student.userName} <br />
+                              {student.userName} <br />
                               <span className="text-xs text-muted-foreground">
-                                {student.student.userEmail}
+                                {student.userEmail}
                               </span>
                             </TableCell>
                             <TableCell>

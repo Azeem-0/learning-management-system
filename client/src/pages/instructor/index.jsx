@@ -5,7 +5,7 @@ import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { AuthContext } from "@/context/auth-context";
 import { InstructorContext } from "@/context/instructor-context";
 import { fetchInstructorCourseListService } from "@/services";
-import { HomeIcon, ListBulletIcon } from "@radix-ui/react-icons";
+import { DashboardIcon, HomeIcon, ListBulletIcon } from "@radix-ui/react-icons";
 import {
   BarChart,
   Book,
@@ -22,6 +22,7 @@ import StudentHomePage from "../student/home";
 import AdminBulkRegisterPage from "@/components/admin-components";
 import ContestsPage from "../contests";
 import QuizCreator from "@/components/instructor-view/quiz";
+import QuizDashboard from "./quiz-dashboard";
 
 function InstructorDashboardpage() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -68,6 +69,12 @@ function InstructorDashboardpage() {
       label: "Quiz",
       value: "quiz",
       component: <QuizCreator listOfCourses={instructorCoursesList}/>
+    },
+    {
+      icon : DashboardIcon, 
+      label: "Quiz Dashboard",
+      value: "quiz-dashboard",
+      component: <QuizDashboard listOfCourses={instructorCoursesList}/>
     },
     {
       icon: LogIn,
