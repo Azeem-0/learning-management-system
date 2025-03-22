@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -6,11 +6,14 @@ import Lottie from "lottie-react";
 import FaucetLottie from "@/assets/lotties/FaucetLottie.json";
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { client } from "@/web3/config/viemConfig.js";
+import { BaseError } from "viem";
 import {
   CONTRACT_ADDRESS,
   MELODY_COIN_ABI,
 } from "@/web3/constants/contractConstants";
 import { Loader2, CheckCircle2 } from "lucide-react";
+import { nContext } from "@/context/notification-context";
+import { faucetRevertMapping } from "@/lib/utils";
 
 const isValidEthereumAddress = (address) => {
   if (!address || typeof address !== "string") return false;
@@ -18,6 +21,7 @@ const isValidEthereumAddress = (address) => {
 };
 
 function AwardERC20() {
+  const { notify } = useContext(nContext);
   const [walletAddress, setWalletAddress] = useState("");
   const [isAwarding, setIsAwarding] = useState(false);
   const [isValidAddress, setIsValidAddress] = useState(false);
@@ -49,8 +53,13 @@ function AwardERC20() {
       writeContract(request);
     } catch (error) {
       console.error("Error awarding token:", error);
-    } finally {
       setIsAwarding(false);
+      if (error instanceof BaseError) {
+        const errorText = faucetRevertMapping(error);
+        notify(errorText);
+      } else {
+        notify("Failed to get assets from faucet");
+      }
     }
   }
 
