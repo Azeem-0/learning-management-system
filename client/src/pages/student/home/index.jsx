@@ -75,6 +75,53 @@ function StudentHomePage() {
         </div>
       </section>
 
+      {/* Blockchain Rewards Banner */}
+      <section className="py-10 px-4 lg:px-8 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white">
+        <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-8">
+          <div className="lg:w-1/2 space-y-4">
+            <h2 className="text-3xl font-bold">Earn While You Learn</h2>
+            <p className="text-lg opacity-90">
+              Introducing a brand-new way of rewarding students! Your
+              instructors can now reward your progress and achievements with
+              ERC-20 tokens on the Sepolia network.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <span className="px-3 py-1 bg-white/20 rounded-full text-sm">
+                Blockchain Rewards
+              </span>
+              <span className="px-3 py-1 bg-white/20 rounded-full text-sm">
+                ERC-20 Tokens
+              </span>
+              <span className="px-3 py-1 bg-white/20 rounded-full text-sm">
+                Real-world Value
+              </span>
+            </div>
+          </div>
+          <div className="lg:w-1/2 flex justify-center gap-6">
+            <div className="relative w-32 h-32 bg-white/10 rounded-lg p-4 transform hover:scale-105 transition-transform duration-300">
+              <img
+                src="/ethereum.jpeg"
+                alt="Ethereum"
+                className="w-full h-full object-contain"
+              />
+              <div className="absolute bottom-2 left-0 right-0 text-center text-sm font-medium">
+                Ethereum
+              </div>
+            </div>
+            <div className="relative w-32 h-32 bg-white/10 rounded-lg p-4 transform hover:scale-105 transition-transform duration-300">
+              <img
+                src="/solana.png"
+                alt="Solana"
+                className="w-full h-full object-contain"
+              />
+              <div className="absolute bottom-2 left-0 right-0 text-center text-sm font-medium">
+                Solana
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Course Categories */}
       <section className="py-8 px-4 lg:px-8 bg-gray-100">
         <h2 className="text-2xl font-bold mb-6">Course Categories</h2>
