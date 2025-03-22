@@ -174,6 +174,42 @@ console.log(fibonacci(10));`}
           )}
         </div>
       </section>
+
+      {/* Upcoming Features Carousel */}
+      <section className="py-12 px-4 lg:px-8 bg-gray-50">
+        <h2 className="text-2xl font-bold mb-6">Upcoming Features</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          {/* Code Climb Card */}
+          <div className="relative h-64 group overflow-hidden rounded-lg shadow-lg">
+            <div
+              className="absolute inset-0 bg-cover bg-center transition-all duration-300 group-hover:opacity-50"
+              style={{ backgroundImage: "url(/code-climb.jpeg)" }}
+            />
+            <div className="absolute inset-0 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <h3 className="text-2xl font-bold text-black mb-2">Code-Climb</h3>
+              <p className="text-black text-center px-4">where coding is fun</p>
+            </div>
+          </div>
+
+          {/* Coming Soon Cards */}
+          {[1, 2].map((item) => (
+            <div
+              key={item}
+              className="relative h-64 rounded-lg shadow-lg overflow-hidden"
+            >
+              <div
+                className="absolute inset-0 bg-cover bg-center opacity-10"
+                style={{ backgroundImage: "url(/code-climb.jpeg)" }}
+              />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <h3 className="text-2xl font-bold text-black">
+                  Coming Soon...
+                </h3>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }
