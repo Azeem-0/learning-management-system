@@ -198,8 +198,12 @@ console.log(fibonacci(10));`}
               className="relative h-64 rounded-lg shadow-lg overflow-hidden"
             >
               <div
-                className="absolute inset-0 bg-cover bg-center opacity-10"
-                style={{ backgroundImage: "url(/code-climb.jpeg)" }}
+                className="absolute inset-0 bg-cover bg-center opacity-40"
+                style={{
+                  backgroundImage: `url(${
+                    item === 1 ? "/ethereum.jpeg" : "/solana.png"
+                  })`,
+                }}
               />
               <div className="absolute inset-0 flex items-center justify-center">
                 <h3 className="text-2xl font-bold text-black">
