@@ -22,6 +22,7 @@ import { nContext } from "@/context/notification-context";
 import InstructorStudentSelection from "./student-selection";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AwardERC20 from "./award-erc20";
+import CheckBalance from "./check-balance";
 
 function InstructorDashboard({ listOfCourses }) {
   const { notify } = useContext(nContext);
@@ -90,6 +91,7 @@ function InstructorDashboard({ listOfCourses }) {
           <TabsTrigger value="addStudents">Add Students</TabsTrigger>
           <TabsTrigger value="courses">Courses</TabsTrigger>
           <TabsTrigger value="awardTokens">Award Tokens</TabsTrigger>
+          <TabsTrigger value="checkRewards">Check Rewards</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview">
@@ -123,6 +125,10 @@ function InstructorDashboard({ listOfCourses }) {
 
         <TabsContent value="awardTokens">
           <AwardERC20 />
+        </TabsContent>
+
+        <TabsContent value="checkRewards">
+          <CheckBalance />
         </TabsContent>
 
         <TabsContent value="courses">

@@ -64,52 +64,73 @@ function AwardERC20() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <span>Award ERC20 Tokens</span>
-          <div className="w-12 h-12">
-            <Lottie animationData={FaucetLottie} loop={true} autoplay={true} />
-          </div>
+    <Card className="bg-gradient-to-br from-blue-50 to-purple-50 border-none shadow-lg">
+      <CardContent className="p-6 flex flex-col items-center space-y-6">
+        <div className="w-48 h-48 mb-4">
+          <Lottie animationData={FaucetLottie} loop={true} autoplay={true} />
+        </div>
+
+        <CardTitle className="text-2xl font-bold text-center text-blue-600">
+          Award ERC20 Tokens
         </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <Input
-          type="text"
-          placeholder="Enter student wallet address"
-          value={walletAddress}
-          onChange={(e) => {
-            const address = e.target.value;
-            setWalletAddress(address);
-            setIsValidAddress(isValidEthereumAddress(address));
-          }}
-          className={walletAddress && !isValidAddress ? "border-red-500" : ""}
-          aria-invalid={walletAddress && !isValidAddress}
-        />
-        {hash && (
-          <div className="text-sm bg-gray-100 p-3 rounded-md mb-4 break-all">
-            <span className="font-semibold">Transaction hash:</span> {hash}
+
+        <div className="w-full max-w-md space-y-4">
+          <Input
+            type="text"
+            placeholder="Enter student wallet address"
+            value={walletAddress}
+            onChange={(e) => {
+              const address = e.target.value;
+              setWalletAddress(address);
+              setIsValidAddress(isValidEthereumAddress(address));
+            }}
+            className={`transition-all duration-200 ${
+              walletAddress && !isValidAddress
+                ? "border-red-500 bg-red-50"
+                : "focus:border-blue-500"
+            }`}
+            aria-invalid={walletAddress && !isValidAddress}
+          />
+
+          {hash && (
+            <div className="text-sm bg-white/50 backdrop-blur-sm p-4 rounded-lg break-all border border-blue-100">
+              <span className="font-semibold text-blue-700">
+                Transaction hash:
+              </span>
+              <span className="text-gray-600"> {hash}</span>
+            </div>
+          )}
+
+          <div className="flex justify-center">
+            {isConfirming && (
+              <div className="text-sm text-blue-600 flex items-center gap-2">
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Waiting for confirmation...
+              </div>
+            )}
+            {isConfirmed && (
+              <div className="text-sm text-green-600 flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5" />
+                Transaction confirmed!
+              </div>
+            )}
           </div>
-        )}
-        {isConfirming && (
-          <div className="text-sm text-blue-600 flex items-center justify-center gap-2 mb-4">
-            <Loader2 className="w-4 h-4 animate-spin" />
-            Waiting for confirmation...
-          </div>
-        )}
-        {isConfirmed && (
-          <div className="text-sm text-green-600 flex items-center justify-center gap-2 mb-4">
-            <CheckCircle2 className="w-4 h-4" />
-            Transaction confirmed.
-          </div>
-        )}
-        <Button
-          className="w-full"
-          onClick={handleAwardToken}
-          disabled={!isValidAddress || isAwarding}
-        >
-          {isAwarding ? "Awarding..." : "Award 0.1 MLD"}
-        </Button>
+
+          <Button
+            className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 transition-all duration-200"
+            onClick={handleAwardToken}
+            disabled={!isValidAddress || isAwarding}
+          >
+            {isAwarding ? (
+              <div className="flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Awarding...
+              </div>
+            ) : (
+              "Award 0.1 MLD"
+            )}
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
