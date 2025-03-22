@@ -42,6 +42,15 @@ app.use("/api", studentSelectionRoutes);
 app.use("/contests", contestsRoutes);
 app.use("/submissions", submissionRoutes);
 app.use("/quiz", quizRoutes);
+app.get("/generate-chat-token", (req, res) => {
+  const userId = Math.floor(Math.random() * 1000000).toString();
+  const crypto = require("crypto");
+  const hmac = crypto.createHmac("sha256", process.env.CHATBASE_SECRET_KEY).update(userId).digest("hex");
+
+  console.log(`Generated HMAC for user ${userId}: ${hmac}`);
+
+  res.json({ hmac, userId });
+});
 
 app.use((err, req, res, next) => {
   console.log(err.stack);
