@@ -5,12 +5,25 @@ import { Button } from "@/components/ui/button";
 import Lottie from "lottie-react";
 import FaucetLottie from "@/assets/lotties/FaucetLottie.json";
 
+const isValidEthereumAddress = (address) => {
+  if (!address || typeof address !== "string") return false;
+  return /^0x[a-fA-F0-9]{40}$/.test(address);
+};
+
 function AwardERC20() {
   const [walletAddress, setWalletAddress] = useState("");
   const [isAwarding, setIsAwarding] = useState(false);
+  const [isValidAddress, setIsValidAddress] = useState(false);
 
   async function handleAwardToken() {
-    if (!walletAddress) return;
+    if (!walletAddress) {
+      notify("Please enter a wallet address");
+      return;
+    }
+    if (!isValidAddress) {
+      notify("Invalid EVM address format");
+      return;
+    }
     setIsAwarding(true);
     try {
       // TODO: Implement token award logic here
@@ -38,12 +51,18 @@ function AwardERC20() {
           type="text"
           placeholder="Enter student wallet address"
           value={walletAddress}
-          onChange={(e) => setWalletAddress(e.target.value)}
+          onChange={(e) => {
+            const address = e.target.value;
+            setWalletAddress(address);
+            setIsValidAddress(isValidEthereumAddress(address));
+          }}
+          className={walletAddress && !isValidAddress ? "border-red-500" : ""}
+          aria-invalid={walletAddress && !isValidAddress}
         />
         <Button
           className="w-full"
           onClick={handleAwardToken}
-          disabled={!walletAddress || isAwarding}
+          disabled={!isValidAddress || isAwarding}
         >
           {isAwarding ? "Awarding..." : "Award 0.1 MLD"}
         </Button>
