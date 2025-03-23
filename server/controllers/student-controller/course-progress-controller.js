@@ -5,9 +5,10 @@ const StudentCourses = require("../../models/StudentCourses");
 //mark current lecture as viewed
 const markCurrentLectureAsViewed = async (req, res) => {
   try {
-    const { userId, courseId, lectureId } = req.body;
+    const { userId, courseId, lectureId, progressValue } = req.body;
 
     let progress = await CourseProgress.findOne({ userId, courseId });
+
     if (!progress) {
       progress = new CourseProgress({
         userId,
@@ -15,8 +16,9 @@ const markCurrentLectureAsViewed = async (req, res) => {
         lecturesProgress: [
           {
             lectureId,
-            viewed: true,
+            viewed: progressValue >= 90,
             dateViewed: new Date(),
+            progress: progressValue,
           },
         ],
       });
@@ -27,52 +29,33 @@ const markCurrentLectureAsViewed = async (req, res) => {
       );
 
       if (lectureProgress) {
-        lectureProgress.viewed = true;
-        lectureProgress.dateViewed = new Date();
+        if (!lectureProgress.viewed) {
+          lectureProgress.progress = progressValue;
+          lectureProgress.viewed = progressValue >= 90;
+          lectureProgress.dateViewed = new Date();
+        }
       } else {
         progress.lecturesProgress.push({
           lectureId,
-          viewed: true,
+          viewed: progressValue >= 90,
           dateViewed: new Date(),
+          progress: progressValue,
         });
       }
       await progress.save();
     }
 
-    const course = await Course.findById(courseId);
-
-    if (!course) {
-      return res.status(404).json({
-        success: false,
-        message: "Course not found",
-      });
-    }
-
-    //check all the lectures are viewed or not
-    const allLecturesViewed =
-      progress.lecturesProgress.length === course.curriculum.length &&
-      progress.lecturesProgress.every((item) => item.viewed);
-
-    if (allLecturesViewed) {
-      progress.completed = true;
-      progress.completionDate = new Date();
-
-      await progress.save();
-    }
-
     res.status(200).json({
       success: true,
-      message: "Lecture marked as viewed",
+      message: "Progress updated successfully",
       data: progress,
     });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      success: false,
-      message: "Some error occured!",
-    });
+    console.error(error);
+    res.status(500).json({ success: false, message: "Error updating progress" });
   }
 };
+
 
 //get current course progress
 const getCurrentCourseProgress = async (req, res) => {

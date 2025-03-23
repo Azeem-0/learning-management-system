@@ -1,5 +1,6 @@
 const Course = require("../../models/Course");
 const StudentCourses = require("../../models/StudentCourses");
+const CourseProgress = require("../../models/CourseProgress");
 const User = require("../../models/User");
 
 const getAllStudentViewCourses = async (req, res) => {
@@ -30,17 +31,6 @@ const getAllStudentViewCourses = async (req, res) => {
         coursesQuery._id = { $in: courseIds };
 
         assignedCourses = await Course.find(coursesQuery).populate("quizzes");
-        
-        // Append enrollment date
-        assignedCourses = assignedCourses.map((course) => {
-          const enrollmentInfo = studentCourses.courses.find(
-            (c) => c.courseId.toString() === course._id.toString()
-          );
-          return {
-            ...course.toObject(),
-            enrollmentDate: enrollmentInfo?.dateOfPurchase || null,
-          };
-        });
       }
     }
 
@@ -48,7 +38,7 @@ const getAllStudentViewCourses = async (req, res) => {
     const sortingFunctions = {
       "title-atoz": (a, b) => a.title.localeCompare(b.title),
       "title-ztoa": (a, b) => b.title.localeCompare(a.title),
-      "likes-high": (a, b) => (b.likes || 0) - (a.likes || 0), 
+      "likes-high": (a, b) => (b.likes || 0) - (a.likes || 0),
       "likes-low": (a, b) => (a.likes || 0) - (b.likes || 0),
     };
 
@@ -61,11 +51,10 @@ const getAllStudentViewCourses = async (req, res) => {
   }
 };
 
-
-// Get course details
 const getStudentViewCourseDetails = async (req, res) => {
   try {
     const { id } = req.params;
+
     const courseDetails = await Course.findById(id).populate("quizzes");
 
     if (!courseDetails) {
@@ -76,9 +65,32 @@ const getStudentViewCourseDetails = async (req, res) => {
       });
     }
 
+    // Find progress for the user
+    const progressData = await CourseProgress.findOne({ courseId: id });
+
+    console.log(progressData);
+
+    // Ensure lecturesProgress exists, otherwise create an empty array
+    const lecturesProgress = progressData?.lecturesProgress || [];
+
+    console.log(lecturesProgress);
+
+    const updatedCurriculum = courseDetails.curriculum.map((lecture, index) => {
+      const progress = lecturesProgress[index];
+      return {
+        ...lecture.toObject(),
+        completed: progress?.viewed || false,
+
+      };
+    });
+
+    console.log(updatedCurriculum);
     res.status(200).json({
       success: true,
-      data: courseDetails,
+      data: {
+        ...courseDetails.toObject(),
+        curriculum: updatedCurriculum,
+      },
     });
   } catch (e) {
     console.error(e);
@@ -88,6 +100,9 @@ const getStudentViewCourseDetails = async (req, res) => {
     });
   }
 };
+
+
+
 
 // Add a question to a lecture
 const addQuestion = async (req, res) => {

@@ -40,9 +40,6 @@ function StudentViewCourseProgressPage() {
   async function fetchCurrentCourseProgress() {
     const response = await getCurrentCourseProgressService(auth?.user?._id, id);
     if (response?.success) {
-      if (!response?.data?.isPurchased) {
-        setLockCourse(true);
-      } else {
         setStudentCurrentCourseProgress({
           courseDetails: response?.data?.courseDetails,
           progress: response?.data?.progress,
@@ -73,7 +70,7 @@ function StudentViewCourseProgressPage() {
             ]
           );
         }
-      }
+
     }
   }
 
@@ -155,9 +152,10 @@ function StudentViewCourseProgressPage() {
             width="100%"
             height="500px"
             url={currentLecture?.videoUrl}
-            onProgressUpdate={setCurrentLecture}
+            onProgressUpdate={currentLecture ? setCurrentLecture : () => {}}
             progressData={currentLecture}
           />
+
           <div className="p-6 bg-[#1c1d1f]">
             <h2 className="text-2xl font-bold mb-2">{currentLecture?.title}</h2>
           </div>

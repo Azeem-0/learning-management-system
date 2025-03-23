@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import VideoPlayer from "@/components/video-player";
 import { StudentContext } from "@/context/student-context";
-import { addQuestionService, addReplyService, fetchStudentViewCourseDetailsService, toggleLikeCourseService } from "@/services";
+import { addQuestionService, addReplyService, fetchStudentViewCourseDetailsService, toggleLikeCourseService, updateLectureProgressService } from "@/services";
 import { CheckCircle, Globe, Users, FileText, ChevronDown, ChevronUp, X } from "lucide-react";
 import { useContext, useEffect } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
@@ -42,13 +42,13 @@ function StudentViewCourseDetailsPage() {
         date: new Date().toISOString(),
         replies: []
       };
-  
+
       // Add question under the correct lecture
       setQuestions((prev) => ({
         ...prev,
         [lectureId]: [...(prev[lectureId] || []), newQuestion],
       }));
-  
+
       setQuestion("");
       addQuestionService(
         currentCourseDetailsId,
@@ -59,34 +59,34 @@ function StudentViewCourseDetailsPage() {
       );
     }
   };
-  
-  const handleAddAnswer = (lectureId, questionId, answer) => { 
+
+  const handleAddAnswer = (lectureId, questionId, answer) => {
     if (answer.trim()) {
       setQuestions((prev) => {
-        const updatedQuestions = { ...prev }; 
+        const updatedQuestions = { ...prev };
         const lectureQuestions = updatedQuestions[lectureId] ? [...updatedQuestions[lectureId]] : [];
-  
-        updatedQuestions[lectureId] = lectureQuestions.map(q => 
-          q._id === questionId 
-            ? { 
-                ...q, 
-                replies: [...q.replies, { 
-                  id: Date.now(), 
-                  replyText: answer, 
-                  userName: auth?.user?.userName, 
-                  date: new Date().toISOString() 
-                }] 
-              } 
+
+        updatedQuestions[lectureId] = lectureQuestions.map(q =>
+          q._id === questionId
+            ? {
+              ...q,
+              replies: [...q.replies, {
+                id: Date.now(),
+                replyText: answer,
+                userName: auth?.user?.userName,
+                date: new Date().toISOString()
+              }]
+            }
             : q
         );
-  
-        return updatedQuestions;  
+
+        return updatedQuestions;
       });
-  
+
       addReplyService(currentCourseDetailsId, lectureId, questionId, auth?.user?._id, auth?.user?.userName, answer);
     }
   };
-  
+
   const handleLike = () => {
     if (!hasLiked) {
       setLikes(prevLikes => prevLikes + 1);
@@ -142,6 +142,15 @@ function StudentViewCourseDetailsPage() {
     }
   }
 
+  async function updateLectureProgress({ progressValue }) {
+    try {
+      updateLectureProgressService(auth?.user?._id, currentCourseDetailsId, progressValue.lectureId, progressValue)
+    }
+    catch (err) {
+      console.log(err);
+    }
+  }
+
   useEffect(() => {
     if (currentCourseDetailsId !== null) fetchStudentViewCourseDetails();
   }, [currentCourseDetailsId]);
@@ -158,6 +167,8 @@ function StudentViewCourseDetailsPage() {
   }, [location.pathname]);
 
   if (loadingState) return <Skeleton />;
+
+  console.log(studentViewCourseDetails, "studentViewCourseDetails");
 
   return (
     <div className="max-w-6xl mx-auto p-6">
@@ -222,31 +233,45 @@ function StudentViewCourseDetailsPage() {
               {studentViewCourseDetails?.curriculum?.map((item, index) => (
                 <div key={index} className="mb-4">
                   <div className="flex items-center justify-between py-2 border-b">
-                    <span>{item.title}</span>
+                    <div className="flex items-center">
+                      <span>{item.title}</span>
+                      {item.completed && (
+                        <CheckCircle className="ml-2 h-4 w-4 text-green-500" />
+                      )}
+                    </div>
                     <div className="flex space-x-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
+                      <Button
+                        variant="outline"
+                        size="sm"
                         onClick={() => toggleLectureQuestions(item._id)}
                         className="flex items-center"
                       >
-                        Questions {expandedLecture === item._id ? 
-                          <ChevronUp className="ml-1 h-4 w-4" /> : 
+                        Questions {expandedLecture === item._id ?
+                          <ChevronUp className="ml-1 h-4 w-4" /> :
                           <ChevronDown className="ml-1 h-4 w-4" />}
                       </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
+                      <Button
+                        variant="outline"
+                        size="sm"
                         onClick={() => selectedVideo === item.videoUrl ? setSelectedVideo(null) : setSelectedVideo(item.videoUrl)}
                       >
                         {selectedVideo === item.videoUrl ? "Close" : "Watch"}
                       </Button>
                     </div>
                   </div>
-                  
+
+
                   {selectedVideo === item.videoUrl && (
                     <div className="mt-2 rounded-lg overflow-hidden shadow-md">
-                      <VideoPlayer url={selectedVideo} width="100%" height="250px" />
+                      <VideoPlayer
+                        url={selectedVideo}
+                        width="100%"
+                        height="250px"
+                        progressData={{
+                          lectureId: item._id,
+                        }}
+                        onProgressUpdate={(progressData) => updateLectureProgress(progressData)}
+                      />
                     </div>
                   )}
 
@@ -263,9 +288,9 @@ function StudentViewCourseDetailsPage() {
                               <h4 className="font-medium">
                                 {truncateText(q.questionText)}
                                 {q.questionText.length > 30 && (
-                                  <Button 
-                                    variant="link" 
-                                    size="sm" 
+                                  <Button
+                                    variant="link"
+                                    size="sm"
                                     className="p-0 h-auto text-blue-500"
                                     onClick={() => openPopup(q.questionText, "Question")}
                                   >
@@ -283,9 +308,9 @@ function StudentViewCourseDetailsPage() {
                                   <div className="text-sm">
                                     {truncateText(a.replyText)}
                                     {a.replyText.length > 30 && (
-                                      <Button 
-                                        variant="link" 
-                                        size="sm" 
+                                      <Button
+                                        variant="link"
+                                        size="sm"
                                         className="p-0 h-auto text-blue-500"
                                         onClick={() => openPopup(a.replyText, "Reply from " + a.userName)}
                                       >

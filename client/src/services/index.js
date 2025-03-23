@@ -101,6 +101,8 @@ export async function fetchStudentViewCourseDetailsService(courseId) {
     `/student/course/get/details/${courseId}`
   );
 
+  console.log(data, "data");
+
   return data;
 }
 
@@ -257,7 +259,7 @@ export async function addReplyService(courseId, lectureId, questionId, userId, u
 
 // Like or unlike a course
 export async function toggleLikeCourseService(courseId, userId) {
-  console.log(courseId,"courseId",userId,"userId");
+  console.log(courseId, "courseId", userId, "userId");
   try {
     const response = await axiosInstance.post(`/api/courses/like`, { courseId, userId });
 
@@ -266,4 +268,16 @@ export async function toggleLikeCourseService(courseId, userId) {
     console.error("Error toggling like:", error);
     throw error;
   }
+}
+
+export async function updateLectureProgressService(userId, courseId, lectureId, progressValue) {
+
+  const response = await axiosInstance.post("/api/courses/progress", {
+    userId,
+    courseId,
+    lectureId,
+    progressValue
+  });
+
+  console.log("Progress updated:", response.data);
 }

@@ -179,12 +179,12 @@ function StudentHomePage() {
             </div>
             <pre className="text-green-300">
               {`// Example JavaScript code
-function fibonacci(n) {
-  if (n \u2264 1) return n;
-  return fibonacci(n - 1) + fibonacci(n - 2);
-}
+                  function fibonacci(n) {
+                    if (n \u2264 1) return n;
+                    return fibonacci(n - 1) + fibonacci(n - 2);
+                  }
 
-console.log(fibonacci(10));`}
+                  console.log(fibonacci(10));`}
             </pre>
           </div>
         </div>
@@ -231,7 +231,7 @@ console.log(fibonacci(10));`}
         <h2 className="text-2xl font-bold mb-6">Upcoming Features</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           {/* Code Climb Card */}
-          <div className="relative h-64 group overflow-hidden rounded-lg shadow-lg">
+          <a href="http://localhost:3000" target="_blank" className="relative h-64 group overflow-hidden rounded-lg shadow-lg">
             <div
               className="absolute inset-0 bg-cover bg-center transition-all duration-300 group-hover:opacity-50"
               style={{ backgroundImage: "url(/code-climb.jpeg)" }}
@@ -240,7 +240,7 @@ console.log(fibonacci(10));`}
               <h3 className="text-2xl font-bold text-black mb-2">Code-Climb</h3>
               <p className="text-black text-center px-4">where coding is fun</p>
             </div>
-          </div>
+          </a>
 
           {/* Coming Soon Cards */}
           {[1, 2].map((item) => (

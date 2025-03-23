@@ -19,11 +19,13 @@ function VideoPlayer({
   url,
   onProgressUpdate,
   progressData,
+  updateInterval = 300,
 }) {
   const [playing, setPlaying] = useState(false);
+  const [played, setPlayed] = useState(0);
+  const [lastSentProgress, setLastSentProgress] = useState(0);
   const [volume, setVolume] = useState(0.5);
   const [muted, setMuted] = useState(false);
-  const [played, setPlayed] = useState(0);
   const [seeking, setSeeking] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
@@ -116,13 +118,40 @@ function VideoPlayer({
   }, []);
 
   useEffect(() => {
-    if (played === 1) {
-      onProgressUpdate({
-        ...progressData,
-        progressValue: played,
-      });
+    const interval = setInterval(() => {
+      if (playing) {
+        const currentTime = playerRef?.current?.getCurrentTime();
+        if (currentTime && currentTime - lastSentProgress >= updateInterval) {
+          onProgressUpdate({
+            ...progressData,
+            progressValue: currentTime,
+          });
+          setLastSentProgress(currentTime);
+        }
+      }
+    }, updateInterval * 1000000);
+
+    return () => clearInterval(interval);
+  }, [playing, lastSentProgress]);
+
+  function handleProgress(state) {
+    if (!seeking) {
+      setPlayed(state.played);
+
+      const currentTime = playerRef?.current?.getCurrentTime() || 0;
+      const totalDuration = playerRef?.current?.getDuration() || 1;
+      const progressPercentage = (currentTime / totalDuration) * 100;
+
+      if (onProgressUpdate) {
+        onProgressUpdate({
+          progressValue: currentTime,
+          percentage: progressPercentage,
+        });
+      }
     }
-  }, [played]);
+  }
+
+
 
   return (
     <div
@@ -147,9 +176,8 @@ function VideoPlayer({
       />
       {showControls && (
         <div
-          className={`absolute bottom-0 left-0 right-0 bg-gray-800 bg-opacity-75 p-4 transition-opacity duration-300 ${
-            showControls ? "opacity-100" : "opacity-0"
-          }`}
+          className={`absolute bottom-0 left-0 right-0 bg-gray-800 bg-opacity-75 p-4 transition-opacity duration-300 ${showControls ? "opacity-100" : "opacity-0"
+            }`}
         >
           <Slider
             value={[played * 100]}
