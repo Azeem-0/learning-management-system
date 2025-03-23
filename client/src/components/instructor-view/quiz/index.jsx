@@ -20,7 +20,7 @@ export default function QuizCreator({ listOfCourses }) {
     title: "",
     description: "",
     duration: 30,
-    questions: [{ questionText: "", options: ["", "", "", ""], correctOption: "" }],
+    questions: [{ questionText: "", options: ["", "", "", ""], correctOptionIndex: "" }],
   });
   const [loading, setLoading] = useState(false);
   const [quizzes, setQuizzes] = useState([]);
@@ -31,12 +31,12 @@ export default function QuizCreator({ listOfCourses }) {
   }, []);
 
   const fetchInstructorQuizzes = async () => {
-    console.log(auth,"auth");
+    console.log(auth, "auth");
     if (!auth?.user?._id) return;
-    
+
     setLoadingQuizzes(true);
     try {
-      const response = await fetchInstructorQuizzesService("",auth?.user?._id,"",true);
+      const response = await fetchInstructorQuizzesService("", auth?.user?._id, "", true);
       setQuizzes(response || []);
     } catch (error) {
       console.error("Error fetching quizzes:", error);
@@ -60,7 +60,7 @@ export default function QuizCreator({ listOfCourses }) {
   const addQuestion = () => {
     setNewQuiz({
       ...newQuiz,
-      questions: [...newQuiz.questions, { questionText: "", options: ["", "", "", ""], correctOption: "" }],
+      questions: [...newQuiz.questions, { questionText: "", options: ["", "", "", ""], correctOptionIndex: "" }],
     });
     notify("Question added successfully!");
   };
@@ -84,13 +84,13 @@ export default function QuizCreator({ listOfCourses }) {
       notify("Please select a course for the quiz.");
       return;
     }
-  
+
     if (newQuiz.questions.length === 0) {
       notify("At least one question is required!");
       return;
     }
-    
-    console.log(selectedCourse,"selectedCourse");
+
+    console.log(selectedCourse, "selectedCourse");
 
     const quizData = {
       title: newQuiz.title,
@@ -100,17 +100,17 @@ export default function QuizCreator({ listOfCourses }) {
       questions: newQuiz.questions.map(q => ({
         questionText: q.questionText,
         options: q.options,
-        correctOption: parseInt(q.correctOption, 10)
-      })), 
+        correctOptionIndex: parseInt(q.correctOptionIndex, 10)
+      })),
     };
-  
+
     setLoading(true);
-  
+
     try {
       const response = await createQuizService(quizData);
       console.log("Quiz Created Successfully!", response);
       setShowCreateForm(false);
-      setNewQuiz({ title: "", description: "", duration: 30, questions: [{ questionText: "", options: ["", "", "", ""], correctOption: "" }] });
+      setNewQuiz({ title: "", description: "", duration: 30, questions: [{ questionText: "", options: ["", "", "", ""], correctOptionIndex: "" }] });
       notify("Quiz created successfully!");
       fetchInstructorQuizzes(); // Refresh quiz list
     } catch (error) {
@@ -196,7 +196,7 @@ export default function QuizCreator({ listOfCourses }) {
                     ))}
                     <div className="space-y-2">
                       <Label>Correct Answer (Enter option number 1-4)</Label>
-                      <Input name="correctOption" type="number" min="1" max="4" value={question.correctOption} onChange={(e) => handleInputChange(e, qIndex)} required />
+                      <Input name="correctOptionIndex" type="number" min="1" max="4" value={question.correctOptionIndex} onChange={(e) => handleInputChange(e, qIndex)} required />
                     </div>
                   </CardContent>
                 </Card>

@@ -7,6 +7,11 @@ exports.createQuiz = async (req, res) => {
   try {
     const { courseId, title, description, questions, duration, passingScore, startDate, endDate, shuffleQuestions } = req.body;
 
+
+    const finalStartDate = startDate ? new Date(startDate) : new Date();
+
+    const finalEndDate = endDate ? new Date(endDate) : new Date(finalStartDate.getTime() + duration * 60000);
+
     const course = await Course.findById(courseId);
     if (!course) return res.status(404).json({ success: false, message: "Course not found" });
 
@@ -22,21 +27,21 @@ exports.createQuiz = async (req, res) => {
       students,
       duration: duration || 30,
       passingScore: passingScore || 60,
-      startDate: startDate || new Date(),
-      endDate: endDate || null,
+      startDate: finalStartDate || new Date(),
+      endDate: finalEndDate || null,
       shuffleQuestions: shuffleQuestions || false,
       status: true
     });
 
     await newQuiz.save();
-    
+
     // Update the course to include this quiz
     await Course.findByIdAndUpdate(
       courseId,
       { $push: { quizzes: newQuiz._id } },
       { new: true }
     );
-    
+
     res.status(201).json({ success: true, message: "Quiz created successfully!", quiz: newQuiz });
   } catch (error) {
     res.status(500).json({ success: false, message: "Error creating quiz", error: error.message });
@@ -50,17 +55,17 @@ exports.startQuiz = async (req, res) => {
 
     const quiz = await Quiz.findById(quizId);
     if (!quiz) return res.status(404).json({ success: false, message: "Quiz not found" });
-    
+
     // Check if quiz is active
     const now = new Date();
     if (quiz.startDate > now) {
       return res.status(403).json({ success: false, message: "Quiz is not yet available" });
     }
-    
+
     if (quiz.endDate && quiz.endDate < now) {
       return res.status(403).json({ success: false, message: "Quiz is no longer available" });
     }
-    
+
     // Check if student is enrolled for this quiz
     if (!quiz.students.includes(userId)) {
       return res.status(403).json({ success: false, message: "You are not enrolled in this quiz" });
@@ -68,11 +73,11 @@ exports.startQuiz = async (req, res) => {
 
     // Check if student has already attempted this quiz
     let attempt = await StudentQuizAttempts.findOne({ userId, quizId });
-    
+
     if (attempt && attempt.isSubmitted) {
-      return res.status(403).json({ 
-        success: false, 
-        message: "You have already completed this quiz", 
+      return res.status(403).json({
+        success: false,
+        message: "You have already completed this quiz",
         result: {
           score: attempt.score,
           totalPossibleScore: attempt.totalPossibleScore,
@@ -81,14 +86,14 @@ exports.startQuiz = async (req, res) => {
         }
       });
     }
-    
+
     if (!attempt) {
       // Create a new attempt
-      attempt = new StudentQuizAttempts({ 
-        userId, 
-        quizId, 
-        responses: [], 
-        startedAt: new Date(), 
+      attempt = new StudentQuizAttempts({
+        userId,
+        quizId,
+        responses: [],
+        startedAt: new Date(),
         isSubmitted: false,
         totalPossibleScore: quiz.questions.reduce((total, q) => total + (q.points || 1), 0)
       });
@@ -109,8 +114,8 @@ exports.startQuiz = async (req, res) => {
       points: q.points || 1
     }));
 
-    res.status(200).json({ 
-      success: true, 
+    res.status(200).json({
+      success: true,
       attempt: {
         _id: attempt._id,
         startedAt: attempt.startedAt,
@@ -142,7 +147,7 @@ exports.getQuizzes = async (req, res) => {
       .populate("students", "userName userEmail")
       .populate("courseId", "title")
       .populate("instructorId", "userName");
-      
+
     res.status(200).json({ success: true, quizzes });
   } catch (error) {
     res.status(500).json({ success: false, message: "Error fetching quizzes", error: error.message });
@@ -155,7 +160,7 @@ exports.getQuizById = async (req, res) => {
       .populate("students", "userName userEmail")
       .populate("courseId", "title image")
       .populate("instructorId", "userName");
-      
+
     if (!quiz) return res.status(404).json({ success: false, message: "Quiz not found" });
 
     // Calculate stats about the quiz for instructors
@@ -163,12 +168,12 @@ exports.getQuizById = async (req, res) => {
       const attempts = await StudentQuizAttempts.find({ quizId: quiz._id, isSubmitted: true });
       const stats = {
         totalAttempts: attempts.length,
-        averageScore: attempts.length > 0 ? 
+        averageScore: attempts.length > 0 ?
           attempts.reduce((sum, att) => sum + att.percentageScore, 0) / attempts.length : 0,
-        passRate: attempts.length > 0 ? 
+        passRate: attempts.length > 0 ?
           (attempts.filter(a => a.passed).length / attempts.length) * 100 : 0,
       };
-      
+
       return res.status(200).json({ success: true, quiz, stats });
     }
 
@@ -181,32 +186,32 @@ exports.getQuizById = async (req, res) => {
 exports.updateQuiz = async (req, res) => {
   try {
     // Check if the quiz has any submitted attempts
-    const hasAttempts = await StudentQuizAttempts.exists({ 
-      quizId: req.params.id, 
-      isSubmitted: true 
+    const hasAttempts = await StudentQuizAttempts.exists({
+      quizId: req.params.id,
+      isSubmitted: true
     });
-    
+
     // If there are submitted attempts, restrict which fields can be updated
     if (hasAttempts) {
       const safeUpdates = {};
       const allowedFields = ['title', 'description', 'status', 'endDate'];
-      
+
       Object.keys(req.body).forEach(key => {
         if (allowedFields.includes(key)) {
           safeUpdates[key] = req.body[key];
         }
       });
-      
+
       const updatedQuiz = await Quiz.findByIdAndUpdate(req.params.id, safeUpdates, { new: true });
       if (!updatedQuiz) return res.status(404).json({ success: false, message: "Quiz not found" });
-      
-      return res.status(200).json({ 
-        success: true, 
-        message: "Quiz updated successfully. Some fields could not be modified because there are already submitted attempts.", 
-        quiz: updatedQuiz 
+
+      return res.status(200).json({
+        success: true,
+        message: "Quiz updated successfully. Some fields could not be modified because there are already submitted attempts.",
+        quiz: updatedQuiz
       });
     }
-    
+
     // If no submitted attempts, allow all updates
     const quiz = await Quiz.findById(req.params.id);
     if (!quiz) return res.status(404).json({ success: false, message: "Quiz not found" });
@@ -219,7 +224,7 @@ exports.updateQuiz = async (req, res) => {
         { $pull: { quizzes: quiz._id } },
         { new: true }
       );
-      
+
       // Add quiz to new course
       await Course.findByIdAndUpdate(
         req.body.courseId,
@@ -227,7 +232,7 @@ exports.updateQuiz = async (req, res) => {
         { new: true }
       );
     }
-    
+
     const updatedQuiz = await Quiz.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!updatedQuiz) return res.status(404).json({ success: false, message: "Quiz not found" });
 
@@ -240,21 +245,21 @@ exports.updateQuiz = async (req, res) => {
 exports.deleteQuiz = async (req, res) => {
   try {
     // Check if the quiz has any submitted attempts
-    const hasAttempts = await StudentQuizAttempts.exists({ 
-      quizId: req.params.id, 
-      isSubmitted: true 
+    const hasAttempts = await StudentQuizAttempts.exists({
+      quizId: req.params.id,
+      isSubmitted: true
     });
-    
+
     if (hasAttempts) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Cannot delete quiz because it has submitted attempts. Consider setting status to false instead." 
+      return res.status(400).json({
+        success: false,
+        message: "Cannot delete quiz because it has submitted attempts. Consider setting status to false instead."
       });
     }
-    
+
     // Delete any existing attempts that were started but not submitted
     await StudentQuizAttempts.deleteMany({ quizId: req.params.id });
-    
+
     // Delete the quiz
     const deletedQuiz = await Quiz.findByIdAndDelete(req.params.id);
     if (!deletedQuiz) return res.status(404).json({ success: false, message: "Quiz not found" });
@@ -282,22 +287,22 @@ exports.assignStudentsToQuiz = async (req, res) => {
     // Add only students not already assigned to the quiz
     const existingStudentIds = quiz.students.map(id => id.toString());
     const newStudentIds = studentIds.filter(id => !existingStudentIds.includes(id));
-    
+
     if (newStudentIds.length === 0) {
-      return res.status(200).json({ 
-        success: true, 
-        message: "All students are already assigned to this quiz", 
-        quiz 
+      return res.status(200).json({
+        success: true,
+        message: "All students are already assigned to this quiz",
+        quiz
       });
     }
-    
+
     quiz.students.push(...newStudentIds);
     await quiz.save();
 
-    res.status(200).json({ 
-      success: true, 
-      message: `${newStudentIds.length} students assigned successfully`, 
-      quiz 
+    res.status(200).json({
+      success: true,
+      message: `${newStudentIds.length} students assigned successfully`,
+      quiz
     });
   } catch (error) {
     res.status(500).json({ success: false, message: "Error assigning students", error: error.message });
@@ -317,15 +322,15 @@ exports.submitQuizAttempt = async (req, res) => {
     if (!attempt) {
       return res.status(404).json({ success: false, message: "No active quiz attempt found" });
     }
-    
+
     if (attempt.isSubmitted) {
       return res.status(400).json({ success: false, message: "Quiz already submitted" });
     }
-    
+
     // Calculate time spent
     const now = new Date();
     const timeSpent = Math.floor((now - attempt.startedAt) / 1000); // Time in seconds
-    
+
     // Check if time limit was exceeded
     if (timeSpent > quiz.duration * 60) {
       attempt.timeSpent = quiz.duration * 60;
@@ -336,19 +341,19 @@ exports.submitQuizAttempt = async (req, res) => {
     // Validate and grade responses
     let score = 0;
     const totalPossibleScore = quiz.questions.reduce((total, q) => total + (q.points || 1), 0);
-    
+
     // Process each response
     const processedResponses = [];
-    
+
     for (const response of responses) {
       const question = quiz.questions.id(response.questionId);
-      
+
       if (!question) continue;
-      
+
       const isCorrect = question.correctOptionIndex === response.selectedOptionIndex;
       const points = isCorrect ? (question.points || 1) : 0;
       score += points;
-      
+
       processedResponses.push({
         questionId: response.questionId,
         selectedOptionIndex: response.selectedOptionIndex,
@@ -366,10 +371,10 @@ exports.submitQuizAttempt = async (req, res) => {
     attempt.isSubmitted = true;
 
     await attempt.save();
-    
-    res.status(200).json({ 
-      success: true, 
-      message: "Quiz submitted successfully", 
+
+    res.status(200).json({
+      success: true,
+      message: "Quiz submitted successfully",
       result: {
         score,
         totalPossibleScore,
@@ -386,12 +391,12 @@ exports.submitQuizAttempt = async (req, res) => {
 exports.getStudentQuizAttempts = async (req, res) => {
   try {
     const { userId } = req.params;
-    
+
     // Verify that the requested userId matches the authenticated user or is an instructor
     if (req.user._id.toString() !== userId && req.user.role !== 'instructor') {
       return res.status(403).json({ success: false, message: "Unauthorized to access these records" });
     }
-    
+
     const attempts = await StudentQuizAttempts.find({ userId })
       .populate({
         path: "quizId",
@@ -414,28 +419,28 @@ exports.getQuizzesByCourse = async (req, res) => {
   try {
     const { courseId } = req.params;
     const userId = req.user._id;
-    
+
     // First check if this is an instructor request
-    const course = await Course.findOne({ 
+    const course = await Course.findOne({
       _id: courseId,
       instructorId: userId
     });
-    
+
     let quizzes;
-    
+
     if (course) {
       // This is an instructor, show all quizzes
-      quizzes = await Quiz.find({ 
+      quizzes = await Quiz.find({
         courseId
       }).populate({
         path: 'questions',
         select: 'questionText'
       });
-      
+
       res.status(200).json({ success: true, quizzes });
     } else {
       // This is a student, show only active quizzes
-      quizzes = await Quiz.find({ 
+      quizzes = await Quiz.find({
         courseId,
         status: true,
         startDate: { $lte: new Date() },
@@ -444,14 +449,14 @@ exports.getQuizzesByCourse = async (req, res) => {
           { endDate: { $gte: new Date() } }
         ]
       }).select('title description duration startDate endDate');
-      
+
       // Get student's attempts for these quizzes
       const quizIds = quizzes.map(quiz => quiz._id);
       const attempts = await StudentQuizAttempts.find({
         userId,
         quizId: { $in: quizIds }
       }).select('quizId isSubmitted score percentageScore passed');
-      
+
       // Combine the data
       const quizzesWithAttempts = quizzes.map(quiz => {
         const attempt = attempts.find(a => a.quizId.toString() === quiz._id.toString());
@@ -468,7 +473,7 @@ exports.getQuizzesByCourse = async (req, res) => {
           passed: attempt?.passed || false
         };
       });
-      
+
       res.status(200).json({ success: true, quizzes: quizzesWithAttempts });
     }
   } catch (error) {
@@ -508,14 +513,14 @@ exports.getQuizResults = async (req, res) => {
       return res.status(404).json({ success: false, message: "Course not found" });
     }
 
-    console.log(enrolledStudents,"enrolledStudents");
+    console.log(enrolledStudents, "enrolledStudents");
 
     const studentsWithNoAttempt = enrolledStudents.students
       .filter(s => !attempts.some(a => a.userId._id.toString() === s.studentId.toString()))
       .map(s => ({
         student: s.studentId,
-        userName : s.studentName,
-        userEmail : s.studentEmail,
+        userName: s.studentName,
+        userEmail: s.studentEmail,
         attempted: false
       }));
 
