@@ -166,7 +166,10 @@ export const courseCurriculumInitialFormData = [
 export const sortOptions = [
   { id: "title-atoz", label: "Title: A to Z" },
   { id: "title-ztoa", label: "Title: Z to A" },
+  { id: "likes-high", label: "Most Liked" }, 
+  { id: "likes-low", label: "Least Liked" }, 
 ];
+
 
 export const filterOptions = {
   category: courseCategories,

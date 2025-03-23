@@ -15,24 +15,23 @@ const getAllStudentViewCourses = async (req, res) => {
     let assignedCourses = [];
     const user = await User.findOne({ _id: userId });
 
-    if (user?.role === "instructor") {
-      let coursesQuery = {};
-      if (category) coursesQuery.category = { $in: category.split(",") };
-      if (level) coursesQuery.level = { $in: level.split(",") };
-      if (primaryLanguage) coursesQuery.primaryLanguage = { $in: primaryLanguage.split(",") };
+    let coursesQuery = {};
 
+    if (category) coursesQuery.category = { $in: category.split(",") };
+    if (level) coursesQuery.level = { $in: level.split(",") };
+    if (primaryLanguage) coursesQuery.primaryLanguage = { $in: primaryLanguage.split(",") };
+
+    if (user?.role === "instructor") {
       assignedCourses = await Course.find(coursesQuery).populate("quizzes");
     } else {
       const studentCourses = await StudentCourses.findOne({ userId });
       if (studentCourses) {
         const courseIds = studentCourses.courses.map((course) => course.courseId);
-        let coursesQuery = { _id: { $in: courseIds } };
-
-        if (category) coursesQuery.category = { $in: category.split(",") };
-        if (level) coursesQuery.level = { $in: level.split(",") };
-        if (primaryLanguage) coursesQuery.primaryLanguage = { $in: primaryLanguage.split(",") };
+        coursesQuery._id = { $in: courseIds };
 
         assignedCourses = await Course.find(coursesQuery).populate("quizzes");
+        
+        // Append enrollment date
         assignedCourses = assignedCourses.map((course) => {
           const enrollmentInfo = studentCourses.courses.find(
             (c) => c.courseId.toString() === course._id.toString()
@@ -46,20 +45,14 @@ const getAllStudentViewCourses = async (req, res) => {
     }
 
     // Sorting
-    assignedCourses.sort((a, b) => {
-      switch (sortBy) {
-        case "title-atoz":
-          return a.title.localeCompare(b.title);
-        case "title-ztoa":
-          return b.title.localeCompare(a.title);
-        case "most-liked":
-          return b.likes - a.likes; // Sort by likes in descending order
-        case "least-liked":
-          return a.likes - b.likes;
-        default:
-          return a.title.localeCompare(b.title);
-      }
-    });
+    const sortingFunctions = {
+      "title-atoz": (a, b) => a.title.localeCompare(b.title),
+      "title-ztoa": (a, b) => b.title.localeCompare(a.title),
+      "likes-high": (a, b) => (b.likes || 0) - (a.likes || 0), 
+      "likes-low": (a, b) => (a.likes || 0) - (b.likes || 0),
+    };
+
+    assignedCourses.sort(sortingFunctions[sortBy] || sortingFunctions["title-atoz"]);
 
     res.status(200).json({ success: true, data: assignedCourses });
   } catch (error) {
@@ -67,6 +60,7 @@ const getAllStudentViewCourses = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
+
 
 // Get course details
 const getStudentViewCourseDetails = async (req, res) => {
