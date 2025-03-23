@@ -77,7 +77,7 @@ function AwardERC20() {
         </div>
 
         <CardTitle className="text-2xl font-bold text-center text-blue-600">
-          Award ERC20 Tokens
+          Get Faucet Drip
         </CardTitle>
 
         <div className="w-full max-w-md space-y-4">

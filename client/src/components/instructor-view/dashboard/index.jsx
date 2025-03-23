@@ -91,7 +91,7 @@ function InstructorDashboard({ listOfCourses }) {
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="addStudents">Add Students</TabsTrigger>
           <TabsTrigger value="courses">Courses</TabsTrigger>
-          <TabsTrigger value="awardTokens">Award Tokens</TabsTrigger>
+          <TabsTrigger value="awardTokens">Faucet</TabsTrigger>
           <TabsTrigger value="checkRewards">Check Rewards</TabsTrigger>
         </TabsList>
 
