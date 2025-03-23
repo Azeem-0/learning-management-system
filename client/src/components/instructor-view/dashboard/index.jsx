@@ -10,12 +10,21 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Users, BookOpen } from "lucide-react";
 import { addStudentsToCourse, fetchStudentsByCriteria } from "@/services";
 import { nContext } from "@/context/notification-context";
 import InstructorStudentSelection from "./student-selection";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import CheckBalance from "./check-balance";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
+import GetFaucetDrip from "./award-erc20";
+import RewardERC20 from "./reward-erc20";
 
 function InstructorDashboard({ listOfCourses }) {
   const { notify } = useContext(nContext);
@@ -27,16 +36,16 @@ function InstructorDashboard({ listOfCourses }) {
 
   // Memoize total students calculation to prevent unnecessary recalculations
 
-  console.log(listOfCourses,"list of courses");
+  console.log(listOfCourses, "list of courses");
 
   useEffect(() => {
     fetchTotalStudents();
   }, []);
-  
-  async function fetchTotalStudents() { 
+
+  async function fetchTotalStudents() {
     try {
       const response = await fetchStudentsByCriteria("", "");
-      console.log(response,"response");
+      console.log(response, "response");
       setTotalStudents(response.length);
     } catch (error) {
       console.error("Error fetching total students:", error);
@@ -46,10 +55,10 @@ function InstructorDashboard({ listOfCourses }) {
 
   async function handleStudentSubmit() {
     if (selectedCourse && studentEmail.trim()) {
-      const emails = studentEmail.split(",").map(email => email.trim());
+      const emails = studentEmail.split(",").map((email) => email.trim());
       try {
         await addStudentsToCourse(selectedCourse._id, emails);
-        setStudentEmail(""); 
+        setStudentEmail("");
         setIsDialogOpen(false);
         notify(`Successfully added ${emails.length} students!`);
       } catch (error) {
@@ -69,7 +78,7 @@ function InstructorDashboard({ listOfCourses }) {
       icon: BookOpen,
       label: "Total Courses",
       value: listOfCourses.length,
-    }
+    },
   ];
 
   async function handleViewCourse(course) {
@@ -83,14 +92,19 @@ function InstructorDashboard({ listOfCourses }) {
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="addStudents">Add Students</TabsTrigger>
           <TabsTrigger value="courses">Courses</TabsTrigger>
+          <TabsTrigger value="awardTokens">Faucet</TabsTrigger>
+          <TabsTrigger value="rewardStudents">Reward student</TabsTrigger>
+          <TabsTrigger value="checkRewards">Check Rewards</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="overview">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             {stats.map((item, index) => (
               <Card key={index}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">{item.label}</CardTitle>
+                  <CardTitle className="text-sm font-medium">
+                    {item.label}
+                  </CardTitle>
                   <item.icon className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
@@ -100,7 +114,7 @@ function InstructorDashboard({ listOfCourses }) {
             ))}
           </div>
         </TabsContent>
-        
+
         <TabsContent value="addStudents">
           <Card>
             <CardHeader>
@@ -111,7 +125,19 @@ function InstructorDashboard({ listOfCourses }) {
             </CardContent>
           </Card>
         </TabsContent>
-        
+
+        <TabsContent value="awardTokens">
+          <GetFaucetDrip />
+        </TabsContent>
+
+        <TabsContent value="rewardStudents">
+          <RewardERC20 />
+        </TabsContent>
+
+        <TabsContent value="checkRewards">
+          <CheckBalance />
+        </TabsContent>
+
         <TabsContent value="courses">
           <Card>
             <CardHeader>
@@ -133,22 +159,32 @@ function InstructorDashboard({ listOfCourses }) {
                   <TableBody>
                     {listOfCourses.map((course, index) => (
                       <TableRow key={index}>
-                        <TableCell className="font-medium">{course.title.length > 15 ? `${course.title.slice(0, 15)}...` : course.title}</TableCell>
+                        <TableCell className="font-medium">
+                          {course.title.length > 15
+                            ? `${course.title.slice(0, 15)}...`
+                            : course.title}
+                        </TableCell>
                         <TableCell>{course.instructorName || "N/A"}</TableCell>
-                        <TableCell>{course.category || "Uncategorized"}</TableCell>
+                        <TableCell>
+                          {course.category || "Uncategorized"}
+                        </TableCell>
                         <TableCell>{course.level || "Not specified"}</TableCell>
                         <TableCell>{course.students?.length || 0}</TableCell>
                         <TableCell>
-                          <Button size="sm" variant="outline" onClick={() => handleViewCourse(course)}>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleViewCourse(course)}
+                          >
                             Explore
                           </Button>
                         </TableCell>
                       </TableRow>
                     ))}
-                  </TableBody>  
-        </Table>
-      </div>
-    </CardContent>
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
@@ -170,6 +206,9 @@ function InstructorDashboard({ listOfCourses }) {
           </Button>
         </DialogContent>
       </Dialog>
+      <div className="absolute top-0 right-0 m-2">
+        <ConnectButton />
+      </div>
     </div>
   );
 }

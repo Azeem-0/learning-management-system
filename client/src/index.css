@@ -84,3 +84,10 @@
 .max-z-index {
   z-index: 9999999999 !important;
 }
+
+button[data-testid="rk-connect-button"] {
+  background-color: rgb(241, 86, 84) !important;
+  color: white !important;
+  font-weight: bold !important;
+  width: fit-content !important;
+}
