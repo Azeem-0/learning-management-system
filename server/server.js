@@ -38,6 +38,7 @@ app.use("/media", mediaRoutes);
 app.use("/instructor/course", instructorCourseRoutes);
 app.use("/student/course", studentViewCourseRoutes);
 app.use("/student/course-progress", studentCourseProgressRoutes);
+app.use("/api/courses",studentViewCourseRoutes)
 app.use("/api", studentSelectionRoutes);
 app.use("/contests", contestsRoutes);
 app.use("/submissions", submissionRoutes);

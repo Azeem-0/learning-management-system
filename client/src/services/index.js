@@ -170,7 +170,7 @@ export async function createQuizService(quizData) {
   return data;
 }
 
-export async function fetchInstructorQuizzesService(courseId,instructorId, status) {
+export async function fetchInstructorQuizzesService(courseId, instructorId, status) {
   if (!instructorId) throw new Error("Instructor ID is required");
 
   const { data } = await axiosInstance.get(`/quiz?instructorId=${instructorId}&status=${status}&courseId=${courseId}`);
@@ -217,7 +217,53 @@ export async function getQuizzesByCourseService(courseId) {
   return data;
 }
 
-export async function getQuizResultsService(quizId,instructorId) {
+export async function getQuizResultsService(quizId, instructorId) {
   const { data } = await axiosInstance.get(`/quiz/results/${quizId}?instructorId=${instructorId}`);
   return data.results;
+}
+
+
+
+// Add a question to a lecture
+export async function addQuestionService(courseId, lectureId, studentId, studentName, questionText) {
+  try {
+    const response = await axiosInstance.post(`/api/courses/${courseId}/lectures/${lectureId}/questions`, {
+      studentId,
+      studentName,
+      questionText,
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Error adding question:", error);
+    throw error;
+  }
+}
+
+// Add a reply to a question
+export async function addReplyService(courseId, lectureId, questionId, userId, userName, replyText) {
+  try {
+    const response = await axiosInstance.post(
+      `/api/courses/${courseId}/lectures/${lectureId}/questions/${questionId}/replies`,
+      { userId, userName, replyText }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Error adding reply:", error);
+    throw error;
+  }
+}
+
+// Like or unlike a course
+export async function toggleLikeCourseService(courseId, userId) {
+  console.log(courseId,"courseId",userId,"userId");
+  try {
+    const response = await axiosInstance.post(`/api/courses/like`, { courseId, userId });
+
+    return response.data;
+  } catch (error) {
+    console.error("Error toggling like:", error);
+    throw error;
+  }
 }

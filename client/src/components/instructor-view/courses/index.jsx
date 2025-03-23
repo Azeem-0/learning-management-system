@@ -61,43 +61,48 @@ function InstructorCourses({ listOfCourses }) {
         </Button>
       </CardHeader>
       <CardContent>
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Course</TableHead>
-                <TableHead>Students</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {listOfCourses && listOfCourses.length > 0
-                ? listOfCourses.map((course, index) => (
-                    <TableRow key={index}>
-                      <TableCell className="font-medium">
-                        {course?.title.length > 20 ? `${course?.title.substring(0, 20)}...` : course?.title}
-                      </TableCell>
-                      <TableCell>{course?.students?.length}</TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          onClick={() => {
-                            navigate(`/instructor/edit-course/${course?._id}`);
-                          }}
-                          variant="ghost"
-                          size="sm"
-                        >
-                          <Edit className="h-6 w-6" />
-                        </Button>
-                        <Button variant="ghost" size="sm" onClick={() => handleDeleteLecture(course._id)}>
-                          <Delete className="h-6 w-6" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                : null}
-            </TableBody>
-          </Table>
-        </div>
+        {listOfCourses && listOfCourses.length > 0 ? (
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Course</TableHead>
+                  <TableHead>Students</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {listOfCourses.map((course, index) => (
+                  <TableRow key={index}>
+                    <TableCell className="font-medium">
+                      {course?.title.length > 20 ? `${course?.title.substring(0, 20)}...` : course?.title}
+                    </TableCell>
+                    <TableCell>{course?.students?.length}</TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        onClick={() => {
+                          navigate(`/instructor/edit-course/${course?._id}`);
+                        }}
+                        variant="ghost"
+                        size="sm"
+                      >
+                        <Edit className="h-6 w-6" />
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => handleDeleteLecture(course._id)}>
+                        <Delete className="h-6 w-6" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        ) : (
+          <p className="text-md font-light text-center">
+            You don't have any courses yet. Click the "Create New Course" button above to
+            create one.
+          </p>
+        )}
       </CardContent>
     </Card>
   );
