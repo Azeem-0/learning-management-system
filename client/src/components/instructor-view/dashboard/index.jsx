@@ -21,9 +21,10 @@ import { addStudentsToCourse, fetchStudentsByCriteria } from "@/services";
 import { nContext } from "@/context/notification-context";
 import InstructorStudentSelection from "./student-selection";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import AwardERC20 from "./award-erc20";
 import CheckBalance from "./check-balance";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import GetFaucetDrip from "./award-erc20";
+import RewardERC20 from "./reward-erc20";
 
 function InstructorDashboard({ listOfCourses }) {
   const { notify } = useContext(nContext);
@@ -92,6 +93,7 @@ function InstructorDashboard({ listOfCourses }) {
           <TabsTrigger value="addStudents">Add Students</TabsTrigger>
           <TabsTrigger value="courses">Courses</TabsTrigger>
           <TabsTrigger value="awardTokens">Faucet</TabsTrigger>
+          <TabsTrigger value="rewardStudents">Reward student</TabsTrigger>
           <TabsTrigger value="checkRewards">Check Rewards</TabsTrigger>
         </TabsList>
 
@@ -125,7 +127,11 @@ function InstructorDashboard({ listOfCourses }) {
         </TabsContent>
 
         <TabsContent value="awardTokens">
-          <AwardERC20 />
+          <GetFaucetDrip />
+        </TabsContent>
+
+        <TabsContent value="rewardStudents">
+          <RewardERC20 />
         </TabsContent>
 
         <TabsContent value="checkRewards">

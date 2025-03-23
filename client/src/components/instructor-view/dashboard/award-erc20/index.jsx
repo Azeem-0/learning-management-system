@@ -4,7 +4,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Lottie from "lottie-react";
 import FaucetLottie from "@/assets/lotties/FaucetLottie.json";
-import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
+import {
+  useAccount,
+  useWaitForTransactionReceipt,
+  useWriteContract,
+} from "wagmi";
 import { client } from "@/web3/config/viemConfig.js";
 import { BaseError } from "viem";
 import {
@@ -20,11 +24,10 @@ const isValidEthereumAddress = (address) => {
   return /^0x[a-fA-F0-9]{40}$/.test(address);
 };
 
-function AwardERC20() {
+function GetFaucetDrip() {
+  const { address } = useAccount();
   const { notify } = useContext(nContext);
-  const [walletAddress, setWalletAddress] = useState("");
   const [isAwarding, setIsAwarding] = useState(false);
-  const [isValidAddress, setIsValidAddress] = useState(false);
 
   const { data: hash, writeContract } = useWriteContract();
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
@@ -33,21 +36,13 @@ function AwardERC20() {
     });
 
   async function handleAwardToken() {
-    if (!walletAddress) {
-      notify("Please enter a wallet address");
-      return;
-    }
-    if (!isValidAddress) {
-      notify("Invalid EVM address format");
-      return;
-    }
     setIsAwarding(true);
     try {
       const { request } = await client.simulateContract({
         address: CONTRACT_ADDRESS,
         abi: MELODY_COIN_ABI,
         functionName: "getFaucetAssets",
-        account: walletAddress,
+        account: address,
         args: [],
       });
       writeContract(request);
@@ -69,6 +64,13 @@ function AwardERC20() {
     notify("Transaction hash: " + hash);
   }
 
+  if (hash) {
+    addRecentTransaction({
+      hash,
+      description: `Get 0.1MLD from faucet`,
+    });
+  }
+
   return (
     <Card className="bg-gradient-to-br from-blue-50 to-purple-50 border-none shadow-lg">
       <CardContent className="p-6 flex flex-col items-center space-y-6">
@@ -81,23 +83,6 @@ function AwardERC20() {
         </CardTitle>
 
         <div className="w-full max-w-md space-y-4">
-          <Input
-            type="text"
-            placeholder="Enter student wallet address"
-            value={walletAddress}
-            onChange={(e) => {
-              const address = e.target.value;
-              setWalletAddress(address);
-              setIsValidAddress(isValidEthereumAddress(address));
-            }}
-            className={`transition-all duration-200 ${
-              walletAddress && !isValidAddress
-                ? "border-red-500 bg-red-50"
-                : "focus:border-blue-500"
-            }`}
-            aria-invalid={walletAddress && !isValidAddress}
-          />
-
           {hash && (
             <div className="text-sm bg-white/50 backdrop-blur-sm p-4 rounded-lg break-all border border-blue-100">
               <span className="font-semibold text-blue-700">
@@ -125,7 +110,6 @@ function AwardERC20() {
           <Button
             className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 transition-all duration-200"
             onClick={handleAwardToken}
-            disabled={!isValidAddress || isAwarding}
           >
             {isAwarding ? (
               <div className="flex items-center gap-2">
@@ -142,4 +126,4 @@ function AwardERC20() {
   );
 }
 
-export default AwardERC20;
+export default GetFaucetDrip;
