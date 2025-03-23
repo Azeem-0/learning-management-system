@@ -60,7 +60,13 @@ function AwardERC20() {
       } else {
         notify("Failed to get assets from faucet");
       }
+    } finally {
+      setIsAwarding(false);
     }
+  }
+
+  if (hash) {
+    notify("Transaction hash: " + hash);
   }
 
   return (

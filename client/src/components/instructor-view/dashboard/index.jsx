@@ -23,6 +23,7 @@ import InstructorStudentSelection from "./student-selection";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AwardERC20 from "./award-erc20";
 import CheckBalance from "./check-balance";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 function InstructorDashboard({ listOfCourses }) {
   const { notify } = useContext(nContext);
@@ -199,6 +200,9 @@ function InstructorDashboard({ listOfCourses }) {
           </Button>
         </DialogContent>
       </Dialog>
+      <div className="absolute top-0 right-0 m-2">
+        <ConnectButton />
+      </div>
     </div>
   );
 }

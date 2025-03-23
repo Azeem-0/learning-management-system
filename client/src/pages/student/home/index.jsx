@@ -98,7 +98,11 @@ function StudentHomePage() {
             </div>
           </div>
           <div className="lg:w-1/2 flex justify-center gap-6">
-            <div className="relative w-32 h-32 bg-white/10 rounded-lg p-4 transform hover:scale-105 transition-transform duration-300">
+            <a
+              href="https://sepolia.etherscan.io/"
+              target="_blank"
+              className="relative w-32 h-32 bg-white/10 rounded-lg p-4 transform hover:scale-105 transition-transform duration-300"
+            >
               <img
                 src="/ethereum.jpeg"
                 alt="Ethereum"
@@ -107,7 +111,7 @@ function StudentHomePage() {
               <div className="absolute bottom-2 left-0 right-0 text-center text-sm font-medium">
                 Ethereum
               </div>
-            </div>
+            </a>
             <div className="relative w-32 h-32 bg-white/10 rounded-lg p-4 transform hover:scale-105 transition-transform duration-300">
               <img
                 src="/solana.png"
