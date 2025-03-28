@@ -30,6 +30,7 @@ function InstructorDashboardpage() {
   const { instructorCoursesList, setInstructorCoursesList } =
     useContext(InstructorContext);
 
+
   async function fetchAllCourses() {
     const response = await fetchInstructorCourseListService();
     if (response?.success) setInstructorCoursesList(response?.data);

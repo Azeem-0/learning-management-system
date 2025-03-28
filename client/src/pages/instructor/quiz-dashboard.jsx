@@ -11,28 +11,34 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { InstructorContext } from "@/context/instructor-context";
 import { nContext } from "@/context/notification-context";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { 
-  BarChart, 
-  CheckCircle, 
-  ChevronRight, 
-  Clock, 
-  FileText, 
-  List, 
-  PieChart, 
-  Users, 
-  XCircle 
+import {
+  BarChart,
+  CheckCircle,
+  ChevronRight,
+  Clock,
+  Download,
+  FileCode,
+  FileSpreadsheet,
+  FileText,
+  List,
+  PieChart,
+  Users,
+  XCircle
 } from "lucide-react";
-import axios from "axios";
 import { format } from "date-fns";
 import { AuthContext } from "@/context/auth-context";
 import { fetchInstructorQuizzesService, getQuizResultsService } from "@/services";
+import { DropdownMenu, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenuContent, DropdownMenuItem } from "@radix-ui/react-dropdown-menu";
+import * as XLSX from 'xlsx';
 
 const QuizDashboard = ({ listOfCourses }) => {
   const navigate = useNavigate();
   const { notify } = useContext(nContext);
 
-  const {auth} = useContext(AuthContext);
+  const { auth } = useContext(AuthContext);
 
+  const [open, setOpen] = useState(false);
   const [courses, setCourses] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState("");
   const [quizzes, setQuizzes] = useState([]);
@@ -74,7 +80,7 @@ const QuizDashboard = ({ listOfCourses }) => {
       const response = await fetchInstructorQuizzesService(selectedCourse, auth?.user?._id, true);
       console.log(response, "response");
       setQuizzes(response || []);
-      
+
       // Fetch results for each quiz
       if (response && response.length > 0) {
         fetchQuizResultsForAll(response);
@@ -101,6 +107,7 @@ const QuizDashboard = ({ listOfCourses }) => {
       }
       console.log(results, "results");
       setQuizResults(results);
+
     } catch (error) {
       console.error("Error fetching quiz results:", error);
       notify("Failed to fetch some quiz results");
@@ -113,26 +120,52 @@ const QuizDashboard = ({ listOfCourses }) => {
     const now = new Date();
     const active = quizzes.filter(q => q.status && (!q.endDate || new Date(q.endDate) > now)).length;
     const completed = quizzes.filter(q => !q.status || (q.endDate && new Date(q.endDate) <= now)).length;
-    
+
     // Calculate average pass rate across all quizzes with results
     let totalPassRate = 0;
     let quizzesWithPassRate = 0;
-    
+
     Object.values(quizResults).forEach(result => {
       if (result && result.quizStats) {
         totalPassRate += result.quizStats.passRate;
         quizzesWithPassRate++;
       }
     });
-    
+
     const avgPassRate = quizzesWithPassRate > 0 ? totalPassRate / quizzesWithPassRate : 0;
-    
+
     setSummaryStats({
       totalQuizzes: quizzes.length,
       activeQuizzes: active,
       completedQuizzes: completed,
       averagePassRate: avgPassRate
     });
+  };
+
+  const downloadQuizResults = (quiz) => {
+    const results = quizResults[quiz._id]?.studentResults || [];
+
+    // Flatten quiz results for easier export
+    const flattenedResults = results.map(result => ({
+      studentName: result.student.userName,
+      studentEmail: result.student.userEmail,
+      score: result.percentageScore,
+      status: result.passed ? 'Passed' : 'Failed',
+      timeSpent: formatDuration(result.timeSpent),
+      completedAt: formatDateTime(result.completedAt)
+    }));
+
+    // Generate filename
+    const timestamp = new Date().toISOString().replace(/[:T]/g, '-').split('.')[0];
+    const filename = `${quiz.title}-results-${timestamp}`;
+
+    // Create workbook and worksheet
+    const worksheet = XLSX.utils.json_to_sheet(flattenedResults);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Quiz Results');
+
+    // Generate and download CSV
+    XLSX.writeFile(workbook, `${filename}.csv`);
   };
 
   const viewQuizResults = (quiz) => {
@@ -156,7 +189,7 @@ const QuizDashboard = ({ listOfCourses }) => {
     const now = new Date();
     const startDate = new Date(quiz.startDate);
     const endDate = quiz.endDate ? new Date(quiz.endDate) : null;
-    
+
     if (!quiz.status) {
       return <Badge variant="destructive">Disabled</Badge>;
     } else if (startDate > now) {
@@ -171,10 +204,10 @@ const QuizDashboard = ({ listOfCourses }) => {
   const getStudentCompletionRate = (quizId) => {
     const result = quizResults[quizId];
     if (!result) return 0;
-    
+
     const totalStudents = result.quizStats.totalStudents;
     const attempted = result.quizStats.totalAttempted;
-    
+
     return totalStudents > 0 ? Math.round((attempted / totalStudents) * 100) : 0;
   };
 
@@ -267,8 +300,8 @@ const QuizDashboard = ({ listOfCourses }) => {
           ) : (quizzes.length === 0 && selectedCourse) ? (
             <div className="flex flex-col items-center justify-center h-40">
               <p className="text-muted-foreground mb-4">No quizzes found for this course</p>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => navigate("/instructor/quiz-management")}
               >
                 Create Your First Quiz
@@ -283,7 +316,7 @@ const QuizDashboard = ({ listOfCourses }) => {
               {quizzes.map((quiz) => {
                 const results = quizResults[quiz._id];
                 const completionRate = getStudentCompletionRate(quiz._id);
-                
+
                 return (
                   <div key={quiz._id} className="border rounded-md p-4">
                     <div className="flex items-center justify-between mb-4">
@@ -299,17 +332,38 @@ const QuizDashboard = ({ listOfCourses }) => {
                       </div>
                       <div className="flex items-center space-x-2">
                         {getQuizStatusBadge(quiz)}
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           onClick={() => viewQuizResults(quiz)}
                         >
                           <span>Details</span>
                           <ChevronRight className="h-4 w-4 ml-1" />
                         </Button>
+                        <Button variant="outline" size="sm" className="flex items-center" onClick={() => downloadQuizResults(quiz)}>
+                          <Download className="h-4 w-4 mr-2" />
+                          Export
+                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-56">
+                            <div className="px-2 py-1.5 text-sm font-normal text-muted-foreground">
+                              Export Quiz Results
+                            </div>
+                            <DropdownMenuItem
+                              onSelect={() => downloadQuizResults(quiz)}
+                              className="cursor-pointer hover:bg-accent"
+                            >
+                              <FileSpreadsheet className="mr-2 h-4 w-4" />
+                              Export as CSV
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </div>
-                    
+
                     <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm">
@@ -318,7 +372,7 @@ const QuizDashboard = ({ listOfCourses }) => {
                         </div>
                         <Progress value={completionRate} className="h-2" />
                       </div>
-                      
+
                       <div className="space-y-1">
                         <span className="text-sm font-medium">Pass Rate:</span>
                         <div className="flex items-center space-x-2">
@@ -328,7 +382,7 @@ const QuizDashboard = ({ listOfCourses }) => {
                           </span>
                         </div>
                       </div>
-                      
+
                       <div className="space-y-1">
                         <span className="text-sm font-medium">Avg. Score:</span>
                         <div className="flex items-center space-x-2">
@@ -356,7 +410,7 @@ const QuizDashboard = ({ listOfCourses }) => {
               Detailed performance breakdown for this quiz
             </DialogDescription>
           </DialogHeader>
-          
+
           {selectedQuiz && quizResults[selectedQuiz._id] ? (
             <div className="space-y-6 max-h-[70vh] overflow-y-auto pr-2">
               <div className="grid gap-4 grid-cols-2 sm:grid-cols-4">
@@ -373,7 +427,7 @@ const QuizDashboard = ({ listOfCourses }) => {
                     </div>
                   </CardContent>
                 </Card>
-                
+
                 <Card>
                   <CardHeader className="py-2">
                     <CardTitle className="text-xs">Attempts</CardTitle>
@@ -387,7 +441,7 @@ const QuizDashboard = ({ listOfCourses }) => {
                     </div>
                   </CardContent>
                 </Card>
-                
+
                 <Card>
                   <CardHeader className="py-2">
                     <CardTitle className="text-xs">Avg. Score</CardTitle>
@@ -401,7 +455,7 @@ const QuizDashboard = ({ listOfCourses }) => {
                     </div>
                   </CardContent>
                 </Card>
-                
+
                 <Card>
                   <CardHeader className="py-2">
                     <CardTitle className="text-xs">Pass Rate</CardTitle>
@@ -416,13 +470,13 @@ const QuizDashboard = ({ listOfCourses }) => {
                   </CardContent>
                 </Card>
               </div>
-              
+
               <Tabs defaultValue="completed">
                 <TabsList className="mb-4">
                   <TabsTrigger value="completed">Completed Attempts</TabsTrigger>
                   <TabsTrigger value="pending">Not Attempted</TabsTrigger>
                 </TabsList>
-                
+
                 <TabsContent value="completed">
                   <Table>
                     <TableHeader>
@@ -472,7 +526,7 @@ const QuizDashboard = ({ listOfCourses }) => {
                     </TableBody>
                   </Table>
                 </TabsContent>
-                
+
                 <TabsContent value="pending">
                   <Table>
                     <TableHeader>
@@ -513,7 +567,7 @@ const QuizDashboard = ({ listOfCourses }) => {
               <p>Loading quiz results...</p>
             </div>
           )}
-          
+
           <DialogFooter>
             <Button onClick={() => setShowResultsDialog(false)}>Close</Button>
           </DialogFooter>

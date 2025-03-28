@@ -20,4 +20,7 @@ router.post("/assign-students", authenticate, quizController.assignStudentsToQui
 router.get("/course/:courseId", authenticate, quizController.getQuizzesByCourse);
 router.get("/results/:quizId", authenticate, quizController.getQuizResults);
 
+// Fetch quiz results for instructor. 
+router.get("/quiz-results/:instructorId", quizController.getQuizResultsDownloadFormat);
+
 module.exports = router;

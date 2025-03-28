@@ -2,6 +2,7 @@ const { default: mongoose } = require("mongoose");
 const Course = require("../../models/Course");
 const Quiz = require("../../models/Quiz");
 const StudentQuizAttempts = require("../../models/StudentQuizAttempts");
+const User = require("../../models/User");
 
 exports.createQuiz = async (req, res) => {
   try {
@@ -558,3 +559,47 @@ exports.getQuizResults = async (req, res) => {
     });
   }
 };
+
+exports.getQuizResultsDownloadFormat = async (req, res) => {
+  try {
+    const { instructorId } = req.params;
+
+    // Check if instructor exists
+    const instructorExists = await User.findById(instructorId);
+    if (!instructorExists) {
+      return res.status(404).json({ error: "Instructor not found" });
+    }
+
+    // Fetch all quizzes created by this instructor
+    const quizzes = await Quiz.find({ instructorId }).select("_id title");
+
+    if (!quizzes.length) {
+      return res.status(404).json({ error: "No quizzes found for this instructor" });
+    }
+
+    // Fetch all student quiz attempts for these quizzes
+    const quizIds = quizzes.map(q => q._id);
+    const attempts = await StudentQuizAttempts.find({ quizId: { $in: quizIds } })
+      .populate("userId", "firstName lastName email")
+      .populate("quizId", "title");
+
+    // Format the results
+    const formattedResults = attempts.map(attempt => ({
+      quizTitle: attempt.quizId?.title || "Unknown Quiz",
+      studentName: `${attempt.userId?.firstName} ${attempt.userId?.lastName}`,
+      studentEmail: attempt.userId?.email || "N/A",
+      score: attempt.score,
+      totalPossibleScore: attempt.totalPossibleScore,
+      percentageScore: attempt.percentageScore.toFixed(2),
+      passed: attempt.passed,
+      timeSpent: `${Math.floor(attempt.timeSpent / 60)}m ${attempt.timeSpent % 60}s`,
+      submittedAt: attempt.completedAt ? attempt.completedAt.toISOString() : "Not Submitted",
+      reviewComments: attempt.reviewComments || "No comments"
+    }));
+
+    res.status(200).json(formattedResults);
+  } catch (error) {
+    console.error("Error fetching quiz results:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+}
