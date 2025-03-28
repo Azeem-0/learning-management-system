@@ -40,6 +40,20 @@ function StudentViewCommonHeader() {
           </Button>
         </div> : null}
 
+        {auth?.user?.role === "student" ? <div className="flex items-center space-x-1">
+          <Button
+            variant="ghost"
+            onClick={() => {
+              location.pathname.includes("/student-progress")
+                ? null
+                : navigate("/student-progress");
+            }}
+            className="text-[14px] md:text-[16px] font-medium"
+          >
+            Progress Dashboard
+          </Button>
+        </div> : null}
+
       </div>
       <div className="flex items-center space-x-4">
         <div className="flex gap-4 items-center">

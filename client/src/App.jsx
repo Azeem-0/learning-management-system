@@ -19,6 +19,7 @@ import { ToastContainer } from "react-toastify";
 import StudentQuizDetailsPage from "./pages/quiz";
 import QuizDashboard from "./pages/instructor/quiz-dashboard";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import StudentProgressAnalysis from "./pages/student/student-progress";
 
 function App() {
   const { auth } = useContext(AuthContext);
@@ -106,6 +107,16 @@ function App() {
           <Route path="home" element={<StudentHomePage />} />
           <Route path="courses" element={<StudentViewCoursesPage />} />
           <Route path="contests" element={<ContestsPage />} />
+          <Route
+            path="/student-progress"
+            element={
+              <RouteGuard
+                element={<StudentProgressAnalysis />}
+                authenticated={auth?.authenticate}
+                user={auth?.user}
+              />
+            }
+          />
           <Route
             path="course/details/:id"
             element={<StudentViewCourseDetailsPage />}
