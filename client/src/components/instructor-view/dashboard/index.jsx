@@ -92,9 +92,9 @@ function InstructorDashboard({ listOfCourses }) {
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="addStudents">Add Students</TabsTrigger>
           <TabsTrigger value="courses">Courses</TabsTrigger>
-          <TabsTrigger value="awardTokens">Faucet</TabsTrigger>
+          {/* <TabsTrigger value="awardTokens">Faucet</TabsTrigger>
           <TabsTrigger value="rewardStudents">Reward student</TabsTrigger>
-          <TabsTrigger value="checkRewards">Check Rewards</TabsTrigger>
+          <TabsTrigger value="checkRewards">Check Rewards</TabsTrigger> */}
         </TabsList>
 
         <TabsContent value="overview">
@@ -126,7 +126,7 @@ function InstructorDashboard({ listOfCourses }) {
           </Card>
         </TabsContent>
 
-        <TabsContent value="awardTokens">
+        {/* <TabsContent value="awardTokens">
           <GetFaucetDrip />
         </TabsContent>
 
@@ -136,7 +136,7 @@ function InstructorDashboard({ listOfCourses }) {
 
         <TabsContent value="checkRewards">
           <CheckBalance />
-        </TabsContent>
+        </TabsContent> */}
 
         <TabsContent value="courses">
           <Card>
@@ -206,9 +206,9 @@ function InstructorDashboard({ listOfCourses }) {
           </Button>
         </DialogContent>
       </Dialog>
-      <div className="absolute top-0 right-0 m-2">
-        <ConnectButton />
-      </div>
+      {/* <div className="absolute top-0 right-0 m-2"> */}
+      {/* <ConnectButton />
+      </div> */}
     </div>
   );
 }

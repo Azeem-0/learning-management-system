@@ -30,7 +30,7 @@ function AuthPage() {
     );
   }
 
-  const {notify} = useContext(nContext);
+  const { notify } = useContext(nContext);
 
   return (
     <div className="flex flex-col min-h-screen bg-secondary">
@@ -38,7 +38,7 @@ function AuthPage() {
         <Link to={"/"} className="flex items-center justify-center">
           <GraduationCap className="h-8 w-8 mr-4 text-primary" />
           <span className="font-extrabold text-xl text-primary">
-            MVGR LEARN
+            BYTE LEARN
           </span>
         </Link>
       </header>
@@ -46,7 +46,7 @@ function AuthPage() {
         <div className="w-full max-w-md">
           <div className="mb-6 text-center">
             <h1 className="text-2xl font-bold text-gray-800">
-              Welcome to MVGR LEARN
+              Welcome to BYTE LEARN
             </h1>
             <p className="text-gray-600">
               Your journey to knowledge starts here

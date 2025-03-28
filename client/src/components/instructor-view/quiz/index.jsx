@@ -20,7 +20,7 @@ export default function QuizCreator({ listOfCourses }) {
     title: "",
     description: "",
     duration: 30,
-    questions: [{ questionText: "", options: ["", "", "", ""], correctOptionIndex: "" }],
+    questions: [{ questionText: "", options: ["", "",], correctOptionIndex: "" }],
   });
   const [loading, setLoading] = useState(false);
   const [quizzes, setQuizzes] = useState([]);
@@ -48,14 +48,27 @@ export default function QuizCreator({ listOfCourses }) {
 
   const handleInputChange = (e, index = null) => {
     const { name, value } = e.target;
+
     if (index !== null) {
       const updatedQuestions = [...newQuiz.questions];
+
+      if (name === "correctOptionIndex") {
+        const maxOptions = updatedQuestions[index].options.length;
+        const selectedIndex = parseInt(value, 10) - 1;
+
+        if (selectedIndex < 0 || selectedIndex >= maxOptions) {
+          notify(`Please enter valid option (1 to ${maxOptions}).`);
+          return;
+        }
+      }
+
       updatedQuestions[index][name] = value;
       setNewQuiz({ ...newQuiz, questions: updatedQuestions });
     } else {
       setNewQuiz({ ...newQuiz, [name]: value });
     }
   };
+
 
   const addQuestion = () => {
     setNewQuiz({
@@ -78,6 +91,24 @@ export default function QuizCreator({ listOfCourses }) {
     updatedQuestions[qIndex].options[oIndex] = e.target.value;
     setNewQuiz({ ...newQuiz, questions: updatedQuestions });
   };
+
+  const addOption = (qIndex) => {
+    const updatedQuestions = [...newQuiz.questions];
+    updatedQuestions[qIndex].options.push("");
+    setNewQuiz({ ...newQuiz, questions: updatedQuestions });
+  };
+
+  const removeOption = (qIndex, oIndex) => {
+    const updatedQuestions = [...newQuiz.questions];
+    if (updatedQuestions[qIndex].options.length > 2) {
+      updatedQuestions[qIndex].options.splice(oIndex, 1);
+      setNewQuiz({ ...newQuiz, questions: updatedQuestions });
+    } else {
+      notify("A question must have at least two options!");
+    }
+  };
+
+
 
   const handleCreateQuiz = async () => {
     if (!selectedCourse) {
@@ -189,14 +220,23 @@ export default function QuizCreator({ listOfCourses }) {
                       <Textarea name="questionText" value={question.questionText} onChange={(e) => handleInputChange(e, qIndex)} placeholder="Enter question" required />
                     </div>
                     {question?.options?.map((option, oIndex) => (
-                      <div key={oIndex} className="space-y-2">
-                        <Label>Option {oIndex + 1}</Label>
-                        <Input value={option} onChange={(e) => handleOptionChange(e, qIndex, oIndex)} placeholder={`Enter option ${oIndex + 1}`} required />
+                      <div key={oIndex} className="flex gap-2 items-center">
+                        <Input
+                          value={option}
+                          onChange={(e) => handleOptionChange(e, qIndex, oIndex)}
+                          placeholder={`Enter option ${oIndex + 1}`}
+                          required
+                        />
+                        {question.options.length > 2 && (
+                          <Button onClick={() => removeOption(qIndex, oIndex)} variant="destructive" size="sm">Remove</Button>
+                        )}
                       </div>
                     ))}
+                    <Button onClick={() => addOption(qIndex)} variant="outline" size="sm">Add Option</Button>
+
                     <div className="space-y-2">
-                      <Label>Correct Answer (Enter option number 1-4)</Label>
-                      <Input name="correctOptionIndex" type="number" min="1" max="4" value={question.correctOptionIndex} onChange={(e) => handleInputChange(e, qIndex)} required />
+                      <Label>Correct Answer (Enter option number)</Label>
+                      <Input name="correctOptionIndex" type="number" min="1" max={newQuiz.questions.length} value={question.correctOptionIndex} onChange={(e) => handleInputChange(e, qIndex)} required />
                     </div>
                   </CardContent>
                 </Card>

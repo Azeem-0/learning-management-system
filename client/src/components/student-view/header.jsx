@@ -14,7 +14,7 @@ function StudentViewCommonHeader() {
     sessionStorage.clear();
   }
 
-  console.log("auth : ",auth);
+  console.log("auth : ", auth);
 
   return (
     <header className="flex items-center justify-between p-4 border-b relative">
@@ -22,7 +22,7 @@ function StudentViewCommonHeader() {
         <Link to="/home" className="flex items-center hover:text-black">
           <GraduationCap className="h-8 w-8 mr-4 " />
           <span className="font-extrabold md:text-xl text-[14px]">
-            MVGR LEARN
+            BYTE LEARN
           </span>
         </Link>
 
@@ -45,7 +45,7 @@ function StudentViewCommonHeader() {
         <div className="flex gap-4 items-center">
           <div className="flex items-center gap-2">
             <span className="font-medium text-sm md:text-base">
-              Hello, <span className="font-bold text-indigo-600">{auth?.user?.userName?.length > 10 ? `${auth?.user?.userName.substring(0, 10)}...` : auth?.user?.userName || "Scholar"}!</span> 
+              Hello, <span className="font-bold text-indigo-600">{auth?.user?.userName?.length > 10 ? `${auth?.user?.userName.substring(0, 10)}...` : auth?.user?.userName || "Scholar"}!</span>
               <span className="hidden md:inline ml-1 italic text-gray-600">Ready to learn something amazing today?</span>
             </span>
           </div>
@@ -62,9 +62,9 @@ function StudentViewCommonHeader() {
             </Button>
           </div>
           <div className="flex items-center space-x-1">
-            <Button 
-            variant="ghost"
-            onClick={handleLogout}
+            <Button
+              variant="ghost"
+              onClick={handleLogout}
             >Sign Out</Button>
           </div>
         </div>
