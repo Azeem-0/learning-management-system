@@ -17,9 +17,9 @@ function StudentHomePage() {
   function handleNavigateToCoursesPage(getCurrentId) {
     if (!getCurrentId) return;
 
-    sessionStorage.removeItem("filters");
+    localStorage.removeItem("filters");
     const currentFilter = { category: [getCurrentId] };
-    sessionStorage.setItem("filters", JSON.stringify(currentFilter));
+    localStorage.setItem("filters", JSON.stringify(currentFilter));
     navigate("/courses");
   }
 

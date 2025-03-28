@@ -8,8 +8,8 @@ export const AuthContext = createContext(null);
 
 export default function AuthProvider({ children }) {
 
-  const {notify} = useContext(nContext);
-  
+  const { notify } = useContext(nContext);
+
   const [signInFormData, setSignInFormData] = useState(initialSignInFormData);
   const [signUpFormData, setSignUpFormData] = useState(initialSignUpFormData);
   const [auth, setAuth] = useState({
@@ -24,7 +24,7 @@ export default function AuthProvider({ children }) {
     console.log(data, "data");
 
     if (data.success) {
-      sessionStorage.setItem(
+      localStorage.setItem(
         "accessToken",
         JSON.stringify(data.data.accessToken)
       );
@@ -36,25 +36,31 @@ export default function AuthProvider({ children }) {
 
   async function handleLoginUser(event) {
     event.preventDefault();
-    const data = await loginService(signInFormData);
-    console.log(data, "data");
 
-    if (data.success) {
-      sessionStorage.setItem(
-        "accessToken",
-        JSON.stringify(data.data.accessToken)
-      );
-      setAuth({
-        authenticate: true,
-        user: data.data.user,
-      });
-      notify("Login successful");
-    } else {
-      setAuth({
-        authenticate: false,
-        user: null,
-      });
-      notify("Login failed");
+    try {
+      const data = await loginService(signInFormData);
+      console.log(data, "data");
+
+      if (data.success) {
+        localStorage.setItem(
+          "accessToken",
+          JSON.stringify(data.data.accessToken)
+        );
+        setAuth({
+          authenticate: true,
+          user: data.data.user,
+        });
+        notify("Login successful");
+      } else {
+        setAuth({
+          authenticate: false,
+          user: null,
+        });
+        notify("Login failed");
+      }
+    } catch (error) {
+      notify(error?.response?.data?.message);
+      console.error("Error logging in:", error);
     }
   }
 

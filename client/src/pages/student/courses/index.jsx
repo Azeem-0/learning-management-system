@@ -58,7 +58,7 @@ function StudentViewCoursesPage() {
     }
 
     setFilters(updatedFilters);
-    sessionStorage.setItem("filters", JSON.stringify(updatedFilters));
+    localStorage.setItem("filters", JSON.stringify(updatedFilters));
   }
 
   async function fetchAllStudentViewCourses(filters, sort) {
@@ -78,7 +78,7 @@ function StudentViewCoursesPage() {
   }, [filters]);
 
   useEffect(() => {
-    setFilters(JSON.parse(sessionStorage.getItem("filters")) || {});
+    setFilters(JSON.parse(localStorage.getItem("filters")) || {});
   }, []);
 
   useEffect(() => {
@@ -86,7 +86,7 @@ function StudentViewCoursesPage() {
   }, [filters, sort]); // Included `sort` in dependencies
 
   useEffect(() => {
-    return () => sessionStorage.removeItem("filters");
+    return () => localStorage.removeItem("filters");
   }, []);
 
   return (
@@ -178,9 +178,8 @@ function StudentViewCoursesPage() {
                         </span>
                       </p>
                       <p className="text-[16px] text-gray-600 mt-3 mb-2">
-                        {`${courseItem.curriculum.length} ${
-                          courseItem.curriculum.length === 1 ? "Lecture" : "Lectures"
-                        } - ${courseItem.level.toUpperCase()} Level`}
+                        {`${courseItem.curriculum.length} ${courseItem.curriculum.length === 1 ? "Lecture" : "Lectures"
+                          } - ${courseItem.level.toUpperCase()} Level`}
                       </p>
                     </div>
                   </CardContent>

@@ -65,16 +65,16 @@ function InstructorDashboardpage() {
       component: <ContestsPage />,
     },
     {
-      icon : ListBulletIcon,
+      icon: ListBulletIcon,
       label: "Quiz",
       value: "quiz",
-      component: <QuizCreator listOfCourses={instructorCoursesList}/>
+      component: <QuizCreator listOfCourses={instructorCoursesList} />
     },
     {
-      icon : DashboardIcon, 
+      icon: DashboardIcon,
       label: "Quiz Dashboard",
       value: "quiz-dashboard",
-      component: <QuizDashboard listOfCourses={instructorCoursesList}/>
+      component: <QuizDashboard listOfCourses={instructorCoursesList} />
     },
     {
       icon: LogIn,
@@ -92,7 +92,7 @@ function InstructorDashboardpage() {
 
   function handleLogout() {
     resetCredentials();
-    sessionStorage.clear();
+    localStorage.clear();
   }
 
   return (
@@ -110,10 +110,10 @@ function InstructorDashboardpage() {
                   menuItem.value === "logout"
                     ? handleLogout
                     : menuItem.value === "home"
-                    ? () => {
+                      ? () => {
                         window.location.href = "/";
                       }
-                    : () => setActiveTab(menuItem.value)
+                      : () => setActiveTab(menuItem.value)
                 }
               >
                 <menuItem.icon className="mr-2 h-4 w-4" />

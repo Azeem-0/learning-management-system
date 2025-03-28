@@ -10,9 +10,15 @@ export async function registerService(formData) {
 }
 
 export async function loginService(formData) {
-  const { data } = await axiosInstance.post("/auth/login", formData);
+  try {
+    const { data } = await axiosInstance.post("/auth/login", formData);
+    return data;
+  }
+  catch (err) {
+    console.error("Error logging in:", err);
+    throw err;
+  }
 
-  return data;
 }
 
 export async function checkAuthService() {
