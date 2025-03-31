@@ -375,7 +375,7 @@ function StudentViewCourseDetailsPage() {
 
         <aside className="md:col-span-1">
           <Card className="sticky top-4">
-            <CardContent className="p-6 justify-center flex flex-col">
+            <CardContent className="p-6 gap-y-2 justify-center flex flex-col">
               <img src={studentViewCourseDetails?.image} alt="Course Thumbnail" className="w-full rounded-lg shadow-md mb-4" />
               {studentViewCourseDetails?.quizzes &&
                 studentViewCourseDetails.quizzes.length > 0 && (

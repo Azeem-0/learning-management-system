@@ -131,7 +131,7 @@ export default function QuizCreator({ listOfCourses }) {
       questions: newQuiz.questions.map(q => ({
         questionText: q.questionText,
         options: q.options,
-        correctOptionIndex: parseInt(q.correctOptionIndex, 10)
+        correctOptionIndex: parseInt(q.correctOptionIndex - 1, 10)
       })),
     };
 
