@@ -16,7 +16,7 @@ const StudentProgressAnalysis = () => {
     const fetchStudentProgress = async () => {
         try {
             setLoading(true);
-            const response = await axiosInstance.get(`/api/student/progress-analysis/${auth?.user?._id}`);
+            const response = await axiosInstance.get(`/students/progress-analysis/${auth?.user?._id}`);
             console.log(response);
             setProgressData(response?.data);
             setError(null);

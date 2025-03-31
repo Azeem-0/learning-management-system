@@ -132,7 +132,6 @@ function AdminBulkRegisterPage() {
     }
 
     try {
-      // Create submission payload
       const payload = {
         client_format: formData.client_format,
         format: "json",
@@ -144,7 +143,7 @@ function AdminBulkRegisterPage() {
       console.log("Response:", response.data.message);
       notify(response.data.message);
 
-      // Reset form after successful submission
+
       setFormData({
         client_format: "",
         dataText: "",

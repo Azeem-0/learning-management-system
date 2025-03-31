@@ -34,15 +34,15 @@ mongoose
 
 //routes configuration
 app.use("/auth", authRoutes);
+app.use("/courses", instructorCourseRoutes);
+app.use("/student/courses", studentViewCourseRoutes);
+app.use("/quizzes", quizRoutes);
 app.use("/media", mediaRoutes);
-app.use("/instructor/course", instructorCourseRoutes);
-app.use("/student/course", studentViewCourseRoutes);
 app.use("/student/course-progress", studentCourseProgressRoutes);
-app.use("/api/courses",studentViewCourseRoutes)
-app.use("/api", studentSelectionRoutes);
 app.use("/contests", contestsRoutes);
 app.use("/submissions", submissionRoutes);
-app.use("/quiz", quizRoutes);
+app.use("/students", studentSelectionRoutes);
+
 app.get("/generate-chat-token", (req, res) => {
   const userId = Math.floor(Math.random() * 1000000).toString();
   const crypto = require("crypto");

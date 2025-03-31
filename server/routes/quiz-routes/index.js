@@ -11,16 +11,16 @@ router.put("/:id", authenticate, quizController.updateQuiz);
 router.delete("/:id", authenticate, quizController.deleteQuiz);
 
 // Student quiz endpoints
-router.post("/start-quiz", authenticate, quizController.startQuiz);
-router.post("/submit-attempt", authenticate, quizController.submitQuizAttempt);
+router.post("/start", authenticate, quizController.startQuiz);
+router.post("/submit", authenticate, quizController.submitQuizAttempt);
 router.get("/attempts/:userId", authenticate, quizController.getStudentQuizAttempts);
 
 // Instructor quiz management
 router.post("/assign-students", authenticate, quizController.assignStudentsToQuiz);
 router.get("/course/:courseId", authenticate, quizController.getQuizzesByCourse);
-router.get("/results/:quizId", authenticate, quizController.getQuizResults);
+router.get("/:quizId/results", authenticate, quizController.getQuizResults);
 
 // Fetch quiz results for instructor. 
-router.get("/quiz-results/:instructorId", quizController.getQuizResultsDownloadFormat);
+router.get("/instructor/:instructorId/results", quizController.getQuizResultsDownloadFormat);
 
 module.exports = router;

@@ -9,11 +9,11 @@ const {
 } = require("../../controllers/instructor-controller/course-controller");
 const router = express.Router();
 
-router.post("/add", addNewCourse);
-router.get("/get", getAllCourses);
-router.get("/get/details/:id", getCourseDetailsByID);
-router.put("/update/:id", updateCourseByID);
-router.post("/:courseId/add-students", addStudentsToCourse);
-router.delete("/delete/:id", deleteCourse);
+router.post("/", addNewCourse);
+router.get("/", getAllCourses);
+router.get("/:id", getCourseDetailsByID);
+router.put("/:id", updateCourseByID);
+router.delete("/:id", deleteCourse);
+router.post("/:id/students", addStudentsToCourse);
 
 module.exports = router;

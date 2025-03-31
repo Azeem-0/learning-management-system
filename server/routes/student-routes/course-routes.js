@@ -9,11 +9,11 @@ const {
 const { markCurrentLectureAsViewed } = require("../../controllers/student-controller/course-progress-controller");
 const router = express.Router();
 
-router.get("/get", getAllStudentViewCourses);
-router.get("/get/details/:id", getStudentViewCourseDetails);
-router.post("/progress",markCurrentLectureAsViewed);
-router.post("/like",toggleLikeCourse);
-router.post("/:courseId/lectures/:lectureId/questions",addQuestion);
-router.post("/:courseId/lectures/:lectureId/questions/:questionId/replies",addReply);
+router.get("/", getAllStudentViewCourses);
+router.get("/:id", getStudentViewCourseDetails);
+router.post("/progress", markCurrentLectureAsViewed);
+router.post("/like", toggleLikeCourse);
+router.post("/:courseId/lectures/:lectureId/questions", addQuestion);
+router.post("/:courseId/lectures/:lectureId/questions/:questionId/replies", addReply);
 
 module.exports = router;
