@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Lottie from "lottie-react";
-import MintLottie from "@/assets/lotties/mintlottie.json";
 import { useContractRead } from "wagmi";
 import { client } from "@/web3/config/viemConfig.js";
 import {
@@ -37,7 +36,6 @@ function CheckBalance() {
     <Card className="bg-gradient-to-br from-blue-50 to-purple-50 border-none shadow-lg mt-6">
       <CardContent className="p-6 flex flex-col items-center space-y-6">
         <div className="w-48 h-48 mb-4">
-          <Lottie animationData={MintLottie} loop={true} autoplay={true} />
         </div>
 
         <CardTitle className="text-2xl font-bold text-center text-blue-600">
@@ -54,11 +52,10 @@ function CheckBalance() {
               setWalletAddress(address);
               setIsValidAddress(isValidEthereumAddress(address));
             }}
-            className={`transition-all duration-200 ${
-              walletAddress && !isValidAddress
-                ? "border-red-500 bg-red-50"
-                : "focus:border-blue-500"
-            }`}
+            className={`transition-all duration-200 ${walletAddress && !isValidAddress
+              ? "border-red-500 bg-red-50"
+              : "focus:border-blue-500"
+              }`}
             aria-invalid={walletAddress && !isValidAddress}
           />
 
