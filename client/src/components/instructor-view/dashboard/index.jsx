@@ -21,10 +21,6 @@ import { addStudentsToCourse, fetchStudentsByCriteria } from "@/services";
 import { nContext } from "@/context/notification-context";
 import InstructorStudentSelection from "./student-selection";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import CheckBalance from "./check-balance";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
-import GetFaucetDrip from "./award-erc20";
-import RewardERC20 from "./reward-erc20";
 
 function InstructorDashboard({ listOfCourses }) {
   const { notify } = useContext(nContext);
